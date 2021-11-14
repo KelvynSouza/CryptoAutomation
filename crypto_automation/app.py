@@ -57,17 +57,6 @@ def validate_closed_window(driver):
 #endregion
 
 
-#region Examples
-def commands_examples():
-    assert "Python" in driver.title
-    elem = driver.find_element(By.NAME, "q")
-    elem.clear()
-    elem.send_keys("pycon")
-    elem.send_keys(Keys.RETURN)
-    assert "No results found." not in driver.page_source
-#endregion
-
-
 def configure_metamask():
     change_tab()
 
@@ -141,17 +130,18 @@ def connect_wallet_to_game():
     change_tab(True)
 
 
-driver = setup_driver()
-
-configure_metamask()
-
-driver.close()
-
-change_tab(True)
-
-driver.get("https://app.bombcrypto.io")
-
-connect_wallet_to_game()
-
-driver.close()
+def run():
+    driver = setup_driver()
+    
+    configure_metamask()
+    
+    driver.close()
+    
+    change_tab(True)
+    
+    driver.get("https://app.bombcrypto.io")
+    
+    connect_wallet_to_game()
+    
+    driver.close()
 

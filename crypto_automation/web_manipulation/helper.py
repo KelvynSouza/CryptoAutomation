@@ -3,15 +3,18 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 
-class SeleniumHelper:    
+class SeleniumHelper:  
+    def __init__(self, config):
+        self.__config = config
 
-    def setup_driver():
+
+    def setup_driver(self):
         chrome_options = Options()
-        chrome_options.add_extension('browser_driver\extensions\MetaMask.crx')
+        chrome_options.add_extension(self.__config['WEBDRIVER']['MetaMaskExtension'])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
-        driver = webdriver.Chrome("browser_driver\chromedriver.exe", options=chrome_options)
-        driver.implicitly_wait(10)  
+        driver = webdriver.Chrome(self.__config['WEBDRIVER']['ChromeDriver'], options=chrome_options)
+        driver.implicitly_wait(self.__config['TIMEOUT'].getint('WebScraping'))  
         driver.maximize_window()
         return driver  
 

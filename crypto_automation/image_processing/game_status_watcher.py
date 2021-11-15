@@ -22,7 +22,7 @@ class GameStatusWatcher:
     def start_map_mode(self):
         template_path = 'images\map_mode.png'
 
-        result_match = self.__wait_until_match_is_found(template_path, 15)
+        result_match = self.__wait_until_match_is_found(template_path, 25)
 
         if result_match:
             self.__click_element_by_position(result_match.x, result_match.y)
@@ -59,17 +59,12 @@ class GameStatusWatcher:
 
     def __click_element_by_position(self, x_position, y_position):
         zero_elem = self.webdriver.find_element_by_tag_name('body')
+
         x_body_offset = -(zero_elem.size['width']/2)
         y_body_offset = -(zero_elem.size['height']/2)+130
 
-        width = self.webdriver.get_window_size().get("width") / 2
-        height = self.webdriver.get_window_size().get("height") / 2
-
         actions = ActionChains(self.webdriver)
         actions.move_to_element(zero_elem)
-        actions.move_by_offset(x_body_offset, y_body_offset).context_click().perform()
+        actions.move_by_offset(x_body_offset, y_body_offset).perform()
         actions.move_by_offset(x_position, y_position).click().perform()
-
-        #actions.move_to_element_with_offset(self.webdriver.find_element_by_tag_name('body'), 0, 0).perform()
-        #actions.move_by_offset( x_position, y_position ).click().perform()
         

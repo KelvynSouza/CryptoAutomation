@@ -25,8 +25,8 @@ class GameStatusWatcher:
 
         self.__connect_wallet_and_start()
 
-        error_handling = Thread(self.__thread_safe, [self.__verify_and_handle_game_error, self.__config['RETRY']['VerifyError']])
-        newmap_handling = Thread(self.__thread_safe, [self.__verify_and_handle_newmap, self.__config['RETRY']['VerifyNewMap']])
+        error_handling = Thread(self.__thread_safe, [self.__verify_and_handle_game_error, self.__config['RETRY'].getint('VerifyError')])
+        newmap_handling = Thread(self.__thread_safe, [self.__verify_and_handle_newmap, self.__config['RETRY'].getint('VerifyNewMap')])
 
 
     def __connect_wallet_and_start(self):
@@ -51,9 +51,10 @@ class GameStatusWatcher:
 
 
     def __verify_and_handle_newmap(self):
-        error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['NewMapButton'], 2 )
-        if error:
+        newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['NewMapButton'], 2 )
+        if newmap:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['NewMapButton'])
+
 
 #region Util
     def __find_and_click_by_template(self, template_path):

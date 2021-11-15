@@ -1,10 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 
 class SeleniumHelper:    
@@ -12,8 +8,11 @@ class SeleniumHelper:
     def setup_driver():
         chrome_options = Options()
         chrome_options.add_extension('browser_driver\extensions\MetaMask.crx')
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
         driver = webdriver.Chrome("browser_driver\chromedriver.exe", options=chrome_options)
         driver.implicitly_wait(10)  
+        driver.maximize_window()
         return driver  
 
 

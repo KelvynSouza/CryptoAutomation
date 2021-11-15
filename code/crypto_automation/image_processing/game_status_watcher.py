@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.action_chains import ActionChains
 from web_manipulation.connect_to_wallet import ConnectWallet
 from .helper import ImageHelper
-from ..shared.thread_helper import Thread
+from crypto_automation.shared.thread_helper import Thread
 
 class GameStatusWatcher:
     def __init__(self, webdriver: WebDriver, config: ConfigParser, wallethelper: ConnectWallet):
@@ -25,8 +25,8 @@ class GameStatusWatcher:
 
         self.__connect_wallet_and_start()
 
-        error_handling = Thread(self.__thread_safe, [self.__verify_and_handle_game_error, self.__config['RETRY'].getint('VerifyError')])
-        newmap_handling = Thread(self.__thread_safe, [self.__verify_and_handle_newmap, self.__config['RETRY'].getint('VerifyNewMap')])
+        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('VerifyError'))
+        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('VerifyNewMap'))
 
 
     def __connect_wallet_and_start(self):

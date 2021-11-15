@@ -12,3 +12,4 @@ parts/
 sdist/
 var/
 __pycache__/
+crypto_automation.egg-info/

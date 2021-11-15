@@ -2,9 +2,13 @@ from web_manipulation.helper import SeleniumHelper
 from web_manipulation.connect_to_wallet import ConnectWallet
 from image_processing.game_status_watcher import GameStatusWatcher
 import configparser
+from passlib.context import CryptContext
 
 config = configparser.ConfigParser()
 config.read('settings.ini')
+
+
+
 
 def run():
     selenium_helper = SeleniumHelper(config)
@@ -17,4 +21,3 @@ def run():
 
     game_status_watcher.start_game()
     
-    driver.close()

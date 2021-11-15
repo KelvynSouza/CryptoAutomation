@@ -10,11 +10,11 @@ class SeleniumHelper:
 
     def setup_driver(self):
         chrome_options = Options()
-        chrome_options.add_extension(self.__config['WEBDRIVER']['MetaMaskExtension'])
+        chrome_options.add_extension(self.__config['WEBDRIVER']['metamaskextension'])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
-        driver = webdriver.Chrome(self.__config['WEBDRIVER']['ChromeDriver'], options=chrome_options)
-        driver.implicitly_wait(self.__config['TIMEOUT'].getint('WebScraping'))  
+        driver = webdriver.Chrome(self.__config['WEBDRIVER']['chromedriver'], options=chrome_options)
+        driver.implicitly_wait(self.__config['TIMEOUT'].getint('webscraping'))  
         driver.maximize_window()
         return driver  
 

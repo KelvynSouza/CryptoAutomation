@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class ImageHelper:
-    def find_exact_match_position(self, image, template):
+    def find_exact_match_position(self, image, template, confidence_level = 0.05):
         method = cv2.TM_SQDIFF_NORMED
 
         result = cv2.matchTemplate(image, template, method)
@@ -23,7 +23,7 @@ class ImageHelper:
 
         #only use match with great confidence, we use threshold 0.1 because 
         #with TM_SQDIFF_NORMED the nearer to 0 the better matched
-        threshold = 0.05
+        threshold = confidence_level
         loc = np.where(result <= threshold)
 
         #if it doesnt match anything, it will be 0
@@ -36,7 +36,44 @@ class ImageHelper:
             return center_position
         else: 
             return None
-    
+
+
+    def find_exact_matches_position(self, image, template, confidence_level = 0.05):
+        method = cv2.TM_SQDIFF_NORMED
+
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
+
+        result = cv2.matchTemplate(image, template, method)
+
+        mn,_,mnLoc,_ = cv2.minMaxLoc(result)
+
+        MPx,MPy = mnLoc
+
+        template_y, template_x = template.shape[:2]
+
+        threshold = confidence_level
+        loc = np.where(result <= threshold)
+
+        matches = list(zip(*loc[::-1]))
+
+        rectangles = []
+        for loc in matches:
+            rect = [int(loc[0]), int(loc[1]), template_x, template_y]
+            
+            rectangles.append(rect)
+            rectangles.append(rect)
+        
+        rectangles, weights = cv2.groupRectangles(rectangles, groupThreshold=1, eps=0.5)        
+
+        points = []
+        if len(rectangles):
+            for (x, y, w, h) in rectangles:
+                center_x = x + int(w/2)
+                center_y = y + int(h/2)
+                points.append((center_x, center_y))
+            
+        return points
 
     #region util 
     def show_info(image, isgray=False):

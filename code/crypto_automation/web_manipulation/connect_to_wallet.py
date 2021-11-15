@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from .helper import SeleniumHelper
-
+import keyring  
 
 class ConnectWallet:
 
@@ -21,9 +21,9 @@ class ConnectWallet:
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Importar carteira")
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Concordo")
 
-        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, "//input[contains(@placeholder,'Frase de recuperação')]", self.__config['LOGIN']['SecretPhrase'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "password", self.__config['LOGIN']['NewPassword'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "confirm-password", self.__config['LOGIN']['NewPassword'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, "//input[contains(@placeholder,'Frase de recuperação')]", keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_phrase"))
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "password", keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"))
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "confirm-password", keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"))
 
         self.__selenium_helper.find_and_click_bylocator(self.__driver, By.XPATH, "//span[text()='Eu li e concordo com ']")
 
@@ -42,15 +42,15 @@ class ConnectWallet:
 
         self.__selenium_helper.find_and_click_bytext(self.__driver, "RPC personalizada")
 
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-name",  self.__config['WALLETNETWORK']['NetworkName'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "rpc-url", self.__config['WALLETNETWORK']['NewRPCURL'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "chainId", self.__config['WALLETNETWORK']['ChainID'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-ticker", self.__config['WALLETNETWORK']['Symbol'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "block-explorer-url", self.__config['WALLETNETWORK']['BlockExplorerURL'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-name",  self.__config['WALLETNETWORK']['networkname'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "rpc-url", self.__config['WALLETNETWORK']['newrpcurl'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "chainId", self.__config['WALLETNETWORK']['chainid'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-ticker", self.__config['WALLETNETWORK']['symbol'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "block-explorer-url", self.__config['WALLETNETWORK']['blockexplorerurl'])
 
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Salvar")
 
-        element = WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('WebScraping')).until(
+        element = WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
             EC.presence_of_element_located((By.XPATH, "//span[@class='currency-display-component__suffix' and contains(text(),'BNB')]"))
         )
 
@@ -64,7 +64,7 @@ class ConnectWallet:
 
         self.__driver.switch_to.default_content()    
 
-        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('WebScraping')).until(
+        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
             EC.number_of_windows_to_be(2)
         )
 
@@ -74,11 +74,11 @@ class ConnectWallet:
 
         self.__selenium_helper.find_and_click_bylocator(self.__driver, By.XPATH, "//button[contains(text(),'Conectar')]")
 
-        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('WebScraping')).until(
+        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
             self.__selenium_helper.validate_closed_window
         )      
 
-        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('WebScraping')).until(
+        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
             EC.number_of_windows_to_be(2)
         )
 

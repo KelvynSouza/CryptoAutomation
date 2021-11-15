@@ -21,16 +21,17 @@ class GameStatusWatcher:
     def start_game(self):
         self.wallet_helper.configure_wallet()
 
-        self.webdriver.get(self.__config['URL']['BombCrypto'])  
+        self.webdriver.get(self.__config['URL']['bomb_crypto'])  
 
         self.__connect_wallet_and_start()
 
-        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('VerifyError'))
-        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('VerifyNewMap'))
+        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
+        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
+        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
 
 
     def __connect_wallet_and_start(self):
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['ConnectWalletButton'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__security_check()
 
@@ -40,28 +41,70 @@ class GameStatusWatcher:
 
 
     def __security_check(self):
-        assert self.webdriver.current_url == self.__config['URL']['BombCrypto']
+        assert self.webdriver.current_url == self.__config['URL']['bomb_crypto']
 
 
     def __verify_and_handle_game_error(self):
-        error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['ErrorMessage'], 2 )
+        error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 )
         if error:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['OkButton' ])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['ok_button' ])
             self.__connect_wallet_and_start()
 
 
     def __verify_and_handle_newmap(self):
-        newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['NewMapButton'], 2 )
+        newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['newmap_button'], 2 )
         if newmap:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['NewMapButton'])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
+
+
+    def __verify_and_handle_heroes_status(self):        
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
+
+        self.__click_all_work_buttons()
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
+
+
+    def __click_all_work_buttons(self):
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], self.__config['TIMEOUT'].getint('imagematching'))
+
+        while len(result_match):
+
+            for (x, y) in result_match:
+                self.__click_element_by_position(x, y)
+                time.sleep(0.3)
+
+            (first_button_x, first_button_y) = result_match[0]
+            (last_button_x, last_button_y)  = result_match[len(result_match-1)]
+
+            zero_elem = self.webdriver.find_element_by_tag_name('body')
+            x_body_offset = -(zero_elem.size['width']/2)
+            y_body_offset = -(zero_elem.size['height']/2)+130
+
+            actions = ActionChains(self.webdriver)
+            actions.move_by_offset(x_body_offset, y_body_offset).perform()
+            actions.move_by_offset(last_button_x, last_button_y).click_and_hold().move_by_offset(first_button_x, first_button_y).release()
+
+            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], self.__config['TIMEOUT'].getint('imagematching'))
 
 
 #region Util
     def __find_and_click_by_template(self, template_path):
-        result_match = self.__wait_until_match_is_found(template_path, self.__config['TIMEOUT'].getint('ImageMatching'))
+        result_match = self.__wait_until_match_is_found(template_path, self.__config['TIMEOUT'].getint('imagematching'))
 
         if result_match:
             self.__click_element_by_position(result_match.x, result_match.y)
+
+
+    def __find_all_and_click_by_template(self, template_path):
+        result_match = self.__wait_all_until_match_is_found(template_path, self.__config['TIMEOUT'].getint('imagematching'))
+
+        if result_match:
+            for (x, y) in result_match:
+                self.__click_element_by_position(x, y)
+                time.sleep(0.3)
 
 
     def __wait_until_match_is_found(self, template_path, timeout): 
@@ -74,6 +117,20 @@ class GameStatusWatcher:
             duration += 1
             website_picture = self.__selenium_screenshot_to_opencv() 
             result = self.image_helper.find_exact_match_position(website_picture, template)  
+
+        return result
+
+
+    def __wait_all_until_match_is_found(self, template_path, timeout): 
+        duration = 0
+        result = None        
+        template = cv2.imread(template_path)    
+
+        while result == None and duration < timeout:
+            time.sleep(1)
+            duration += 1
+            website_picture = self.__selenium_screenshot_to_opencv() 
+            result = self.image_helper.find_exact_matches_position(website_picture, template)  
 
         return result
 

@@ -60,7 +60,7 @@ class ImageHelper:
 
         matches = list(zip(*loc[::-1]))
 
-        points = []        
+        points = None        
         if matches:
             rectangles = []
             for loc in matches:

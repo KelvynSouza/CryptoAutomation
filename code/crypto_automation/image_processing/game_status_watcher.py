@@ -77,23 +77,23 @@ class GameStatusWatcher:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
         count = 0
         while len(result_match) == 0 and count <= 2:
-            result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 10, 0.02)
+            result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
 
-            last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
-            
-            self.__click_and_scroll_down(last_active_button_x, last_active_button_y)            
-            
-            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
+            if(result_active_match):
+                last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
+
+                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)            
+
+                result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
             count +=1
 
 
         while len(result_match):
-
             for (x, y) in result_match:
                 self.__click_element_by_position(x, y)
                 time.sleep(0.5)
@@ -102,7 +102,7 @@ class GameStatusWatcher:
             
             self.__click_and_scroll_down(last_button_x, last_button_y)
 
-            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
+            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
 
 #region Util

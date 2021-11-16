@@ -35,12 +35,12 @@ class GameStatusWatcher:
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
 
 
-    def __connect_wallet_and_start(self):
+    def __connect_wallet_and_start(self, reconnect = False):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__security_check()
 
-        self.wallet_helper.connect_wallet_to_game()
+        self.wallet_helper.connect_wallet_to_game(reconnect)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
@@ -53,7 +53,7 @@ class GameStatusWatcher:
         error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['ok_button'])
-            self.__connect_wallet_and_start()
+            self.__connect_wallet_and_start(True)
 
 
     def __verify_and_handle_newmap(self):

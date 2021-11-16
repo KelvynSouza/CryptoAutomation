@@ -57,7 +57,7 @@ class ConnectWallet:
         assert "BNB" in element.text
 
 
-    def connect_wallet_to_game(self):
+    def connect_wallet_to_game(self, reconnect  = False):
         self.__driver.switch_to.frame(self.__driver.find_element(By.XPATH, "//iframe"))
 
         self.__selenium_helper.find_and_click_bytext(self.__driver, "MetaMask")
@@ -68,21 +68,22 @@ class ConnectWallet:
             EC.number_of_windows_to_be(2)
         )
 
-        self.__selenium_helper.change_tab(self.__driver)
+        if reconnect  == False:
+            self.__selenium_helper.change_tab(self.__driver)    
 
-        self.__selenium_helper.find_and_click_bytext(self.__driver, "Próximo")
+            self.__selenium_helper.find_and_click_bytext(self.__driver, "Próximo")
 
-        self.__selenium_helper.find_and_click_bylocator(self.__driver, By.XPATH, "//button[contains(text(),'Conectar')]")
+            self.__selenium_helper.find_and_click_bylocator(self.__driver, By.XPATH, "//button[contains(text(),'Conectar')]")
 
-        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
-            self.__selenium_helper.validate_closed_window
-        )      
+            WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
+                self.__selenium_helper.validate_closed_window
+            )      
 
-        WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
-            EC.number_of_windows_to_be(2)
-        )
+            WebDriverWait(self.__driver, self.__config['TIMEOUT'].getint('webscraping')).until(
+                EC.number_of_windows_to_be(2)
+            )
 
-        self.__selenium_helper.change_tab(self.__driver, True)  
+            self.__selenium_helper.change_tab(self.__driver, True)  
 
         self.__selenium_helper.change_tab(self.__driver)
 

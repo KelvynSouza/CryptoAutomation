@@ -65,8 +65,12 @@ class GameStatusWatcher:
     def __verify_and_handle_heroes_status(self):        
         self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
         self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
+        
+        timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        self.__click_all_work_buttons()
+        if(self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_active_button'], timeout) 
+        or self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_button'], timeout)):
+            self.__click_all_work_buttons()
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])

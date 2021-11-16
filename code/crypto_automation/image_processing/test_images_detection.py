@@ -21,8 +21,8 @@ def show_info(image, isgray=False):
 
 image_helper = ImageHelper()
 
-heroes_list_image = "../images/test/error_screen.png"
-work_button_template = "../images/ok_button.png"
+heroes_list_image = "../images/test/error2_screen.png"
+work_button_template = "../images/error_message.png"
 
 list_hero = cv2.imread(heroes_list_image) 
 template = cv2.imread(work_button_template) 

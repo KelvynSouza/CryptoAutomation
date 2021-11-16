@@ -21,14 +21,25 @@ def show_info(image, isgray=False):
 
 image_helper = ImageHelper()
 
-heroes_list_image = "../images/test/heroes_list.png"
-work_button_template = "../images/work_button.png"
+heroes_list_image = "../images/test/list.png"
+work_button_template = "../images/work_active_button.png"
 
 list_hero = cv2.imread(heroes_list_image) 
+
+cv2.circle(list_hero, (300, 500), 30,(255,0,0), 3)
+cv2.circle(list_hero, (300, 100), 30,(255,0,0), 3)
+
+show_info(list_hero)
+
+
+
 template = cv2.imread(work_button_template) 
 
-points = image_helper.find_exact_matches_position(list_hero, template)
+points = image_helper.find_exact_matches_position(list_hero, template, 0.02)
 
-
+for x, y in points:
+    cv2.circle(list_hero, (x, y),30,(255,0,0), 3)
+    
+show_info(list_hero)
 print('Final')
 

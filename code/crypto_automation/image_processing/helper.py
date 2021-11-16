@@ -3,8 +3,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class ImageHelper:
-    def find_exact_match_position(self, image, template, confidence_level = 0.05):
+    def find_exact_match_position(self, image, template, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
+
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
 
         result = cv2.matchTemplate(image, template, method)
 
@@ -38,7 +41,7 @@ class ImageHelper:
             return None
 
 
-    def find_exact_matches_position(self, image, template, confidence_level = 0.05):
+    def find_exact_matches_position(self, image, template, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
         image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -57,21 +60,22 @@ class ImageHelper:
 
         matches = list(zip(*loc[::-1]))
 
-        rectangles = []
-        for loc in matches:
-            rect = [int(loc[0]), int(loc[1]), template_x, template_y]
-            
-            rectangles.append(rect)
-            rectangles.append(rect)
-        
-        rectangles, weights = cv2.groupRectangles(rectangles, groupThreshold=1, eps=0.5)        
+        points = []        
+        if matches:
+            rectangles = []
+            for loc in matches:
+                rect = [int(loc[0]), int(loc[1]), template_x, template_y]
 
-        points = []
-        if len(rectangles):
-            for (x, y, w, h) in rectangles:
-                center_x = x + int(w/2)
-                center_y = y + int(h/2)
-                points.append((center_x, center_y))
+                rectangles.append(rect)
+                rectangles.append(rect)
+
+            rectangles, weights = cv2.groupRectangles(rectangles, groupThreshold=1, eps=0.5)  
+            
+            if len(rectangles):
+                for (x, y, w, h) in rectangles:
+                    center_x = x + int(w/2)
+                    center_y = y + int(h/2)
+                    points.append((center_x, center_y))
             
         return points
 

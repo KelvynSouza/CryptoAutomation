@@ -8,6 +8,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 from web_manipulation.connect_to_wallet import ConnectWallet
 from .helper import ImageHelper
 from crypto_automation.shared.thread_helper import Thread
+import win32api, win32con
+from win32con import *
+
+#Scroll one up
+
 
 class GameStatusWatcher:
     def __init__(self, webdriver: WebDriver, config: ConfigParser, wallethelper: ConnectWallet):
@@ -25,9 +30,9 @@ class GameStatusWatcher:
 
         self.__connect_wallet_and_start()
 
-        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
-        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
-        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
+        #error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
+        #newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
+        hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
 
 
     def __connect_wallet_and_start(self):
@@ -47,7 +52,7 @@ class GameStatusWatcher:
     def __verify_and_handle_game_error(self):
         error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 )
         if error:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['ok_button' ])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['ok_button'])
             self.__connect_wallet_and_start()
 
 
@@ -68,7 +73,44 @@ class GameStatusWatcher:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], self.__config['TIMEOUT'].getint('imagematching'))
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
+
+        if len(result_match) == 0:
+            result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 10, 0.02)
+
+            first_active_button_x, first_active_button_y = result_active_match[0]
+            last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
+
+            zero_elem = self.webdriver.find_element_by_tag_name('body')
+            x_body_active_offset = -(zero_elem.size['width']/2)
+            y_body_active_offset = -(zero_elem.size['height']/2)+130
+
+            space_to_scroll = -(last_active_button_x - first_active_button_y)
+
+
+            iframe = self.webdriver.find_element_by_tag_name('iframe')
+
+            # switch to selected iframe
+            self.webdriver.switch_to.frame(iframe)
+
+            canvas_elem = self.webdriver.find_element_by_tag_name('canvas')
+
+
+            win32api.SetCursorPos((last_active_button_x, last_active_button_y))
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,last_active_button_x, last_active_button_y,0,0)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,last_active_button_x, last_active_button_y,0,0)
+            #actions = ActionChains(self.webdriver)            
+            #actions.move_to_element_with_offset(canvas_elem, 300, 500).pause(1).click().pause(1).perform()
+            for x in range(100):  
+                win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)
+            #actions.move_to_element_with_offset(canvas_elem).pause(1).release().pause(1).perform()
+            #actions.move_to_element(zero_elem)
+            #actions.move_by_offset(x_body_active_offset, y_body_active_offset).perform()
+            #actions.move_by_offset(last_active_button_x, last_active_button_y).click_and_hold().pause(2).
+
+            self.webdriver.switch_to.default_content()
+            
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
 
         while len(result_match):
 
@@ -76,18 +118,19 @@ class GameStatusWatcher:
                 self.__click_element_by_position(x, y)
                 time.sleep(0.3)
 
-            (first_button_x, first_button_y) = result_match[0]
-            (last_button_x, last_button_y)  = result_match[len(result_match-1)]
+            first_button_x, first_button_y = result_match[0]
+            last_button_x, last_button_y = result_match[len(result_match)-1]
 
             zero_elem = self.webdriver.find_element_by_tag_name('body')
             x_body_offset = -(zero_elem.size['width']/2)
             y_body_offset = -(zero_elem.size['height']/2)+130
 
             actions = ActionChains(self.webdriver)
+            actions.move_to_element(zero_elem)
             actions.move_by_offset(x_body_offset, y_body_offset).perform()
-            actions.move_by_offset(last_button_x, last_button_y).click_and_hold().move_by_offset(first_button_x, first_button_y).release()
+            actions.move_by_offset(last_button_x, last_button_y).click_and_hold().move_by_offset(0, -(last_button_x - first_button_y)).release().perform()
 
-            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], self.__config['TIMEOUT'].getint('imagematching'))
+            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 10, 0.02)
 
 
 #region Util
@@ -121,7 +164,7 @@ class GameStatusWatcher:
         return result
 
 
-    def __wait_all_until_match_is_found(self, template_path, timeout): 
+    def __wait_all_until_match_is_found(self, template_path, timeout, confidence_level = 0.1): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -130,7 +173,7 @@ class GameStatusWatcher:
             time.sleep(1)
             duration += 1
             website_picture = self.__selenium_screenshot_to_opencv() 
-            result = self.image_helper.find_exact_matches_position(website_picture, template)  
+            result = self.image_helper.find_exact_matches_position(website_picture, template, confidence_level)  
 
         return result
 

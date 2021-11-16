@@ -102,8 +102,8 @@ class GameStatusWatcher:
 
 
 #region Util
-    def __find_and_click_by_template(self, template_path):
-        result_match = self.__wait_until_match_is_found(template_path, self.__config['TIMEOUT'].getint('imagematching'))
+    def __find_and_click_by_template(self, template_path, confidence_level = 0.1):
+        result_match = self.__wait_until_match_is_found(template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level)
 
         if result_match:
             self.__click_element_by_position(result_match.x, result_match.y)

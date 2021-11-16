@@ -1,6 +1,7 @@
 from web_manipulation.helper import SeleniumHelper
 from web_manipulation.connect_to_wallet import ConnectWallet
 from image_processing.game_status_watcher import GameStatusWatcher
+from  shared.web_extension_helper import update_extension
 import configparser
 import keyring
 
@@ -11,6 +12,8 @@ config.read(config_filename)
 
 
 def run():
+    update_extension(config['WEBDRIVER']['metamaskextension'],config['WEBDRIVER']['extension_url_download'])
+
     secure_passwords()
 
     selenium_helper = SeleniumHelper(config)

@@ -6,3 +6,4 @@ spicy
 selenium
 keyring
 pywin32
+requests

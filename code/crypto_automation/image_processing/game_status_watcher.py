@@ -52,7 +52,7 @@ class GameStatusWatcher:
     def __verify_and_handle_game_error(self):
         error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['ok_button'])
+            self.webdriver.refresh()
             self.__connect_wallet_and_start(True)
 
 

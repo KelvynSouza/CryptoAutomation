@@ -174,7 +174,7 @@ class GameStatusWatcher:
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x, y,0,0)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)   
-        for x in range(1200):  
+        for x in range(self.__config['IMAGEDETECTION'].getint('scroll_intensity')):  
             win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)
 
     #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})

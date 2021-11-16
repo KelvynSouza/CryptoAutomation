@@ -162,7 +162,7 @@ class GameStatusWatcher:
         #caso ocorra algum problema com click baseado em image, esta pode ser a 
         #causa, por algum motivo bizarro ele tem uns 130px da borda, para 
         #validar a posição do cursor usar click_perform()
-        y_body_offset = -(zero_elem.size['height']/2)+130
+        y_body_offset = -(zero_elem.size['height']/2)+self.__config['IMAGEDETECTION'].getint('click_y_offset')
 
         actions = ActionChains(self.webdriver)
         actions.move_to_element(zero_elem)

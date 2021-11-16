@@ -5,3 +5,4 @@ matplotlib
 spicy
 selenium
 keyring
+pywin32

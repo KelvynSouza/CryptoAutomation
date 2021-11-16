@@ -57,7 +57,7 @@ class GameStatusWatcher:
 
 
     def __verify_and_handle_newmap(self):
-        newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['newmap_button'], 2 )
+        newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['newmap_button'], 2 , 0.05)
         if newmap:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
 

@@ -68,8 +68,8 @@ class GameStatusWatcher:
         
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        if(self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_active_button'], timeout) 
-        or self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_button'], timeout)):
+        if(self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_active_button'], timeout, 0.02) 
+        or self.__wait_until_match_is_found( self.__config['TEMPLATES']['work_button'], timeout, 0.02)):
             self.__click_all_work_buttons()
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])

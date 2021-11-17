@@ -75,7 +75,8 @@ class GameStatusWatcher:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
 
 
-    def __verify_and_handle_heroes_status(self):        
+    def __verify_and_handle_heroes_status(self):
+        logging.warning('Checking heroes status')        
         self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
         self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
         

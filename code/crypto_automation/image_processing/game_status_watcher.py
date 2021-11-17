@@ -57,11 +57,13 @@ class GameStatusWatcher:
     def __verify_and_handle_game_error(self):
         error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
+            logging.error('Error on game, refreshing page.')
             self.webdriver.refresh()
             self.__connect_wallet_and_start(True)
 
         expected_screen = self.__wait_until_match_is_found( self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
+            logging.error('game on wrong page, refreshing page.')
             self.webdriver.refresh()
             self.__connect_wallet_and_start(True)
 
@@ -69,6 +71,7 @@ class GameStatusWatcher:
     def __verify_and_handle_newmap(self):
         newmap = self.__wait_until_match_is_found( self.__config['TEMPLATES']['newmap_button'], 2 , 0.05)
         if newmap:
+            logging.warning('entering new map')
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
 
 

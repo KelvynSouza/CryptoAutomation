@@ -7,3 +7,4 @@ selenium
 keyring
 pywin32
 requests
+undetected-chromedriver

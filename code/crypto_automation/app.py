@@ -6,7 +6,6 @@ import configparser
 import keyring
 import logging
 import traceback
-import os
 from shared.os_helper import create_log_folder
 
 config_filename = "settings.ini"
@@ -42,7 +41,8 @@ def run():
         error = True
         logging.error('Error:' + traceback.format_exc())
         logging.warning('Restarting automation:')
-        driver.quit()
+        if driver:
+            driver.quit()
         run()        
 
     if error == False:

@@ -5,6 +5,7 @@ from  shared.web_extension_helper import update_extension
 import configparser
 import keyring
 import logging
+import traceback
 
 config_filename = "settings.ini"
 
@@ -35,8 +36,9 @@ def run():
 
     except BaseException as ex:
         error = True
-        logging.error('Error:' + ex.with_traceback())
+        logging.error('Error:' + traceback.format_exc())
         logging.warning('Restarting automation:')
+        driver.quit()
         run()        
 
     if error == False:

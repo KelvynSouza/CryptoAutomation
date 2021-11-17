@@ -3,6 +3,7 @@ import numpy as np
 import time
 import threading
 import logging
+import traceback
 from configparser import ConfigParser
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -204,7 +205,7 @@ class GameStatusWatcher:
                     else:
                         method()
                 except BaseException as ex:
-                    logging.error('Error:' + ex.with_traceback())                    
+                    logging.error('Error:' + traceback.format_exc())                   
                     self.__restart_driver()
             time.sleep(retrytime) 
 

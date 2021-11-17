@@ -2,6 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
+from fake_useragent import UserAgent
+import time
 
 class SeleniumHelper:  
     def __init__(self, config):
@@ -9,18 +11,17 @@ class SeleniumHelper:
 
 
     def setup_driver(self):
-        chrome_options = Options()
-        chrome_options.add_argument('--profile-directory=Default')
-        chrome_options.add_argument("--incognito")
+        chrome_options = Options()    
+        ua = UserAgent()
+        userAgent = ua.random
+        chrome_options.add_argument(f'user-agent={userAgent}') 
         chrome_options.add_argument("--disable-plugins-discovery")
         chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
-        chrome_options.add_extension(self.__config['WEBDRIVER']['metamaskextension'])
-        chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_extension(self.__config['WEBDRIVER']['metamaskextension'])
         driver = uc.Chrome(options=chrome_options)
-
-        driver = webdriver.Chrome(self.__config['WEBDRIVER']['chromedriver'], options=chrome_options)
+        
         driver.delete_all_cookies()
         driver.implicitly_wait(self.__config['TIMEOUT'].getint('webscraping'))  
         driver.maximize_window()
@@ -42,16 +43,19 @@ class SeleniumHelper:
 
     def find_and_click_bytext(self, driver, text):
         start_button = driver.find_element(By.XPATH, f"//*[contains(text(),'{text}')]")
+        time.sleep(0.5)
         start_button.click()
 
 
     def find_and_click_bylocator(self, driver, by, locator):
         start_button = driver.find_element(by, locator)
+        time.sleep(0.5)
         start_button.click()
 
 
     def find_and_write_input(self, driver, by, locator, input_text):
         elem = driver.find_element(by, locator)
+        time.sleep(0.5)
         elem.send_keys(input_text)
 
 

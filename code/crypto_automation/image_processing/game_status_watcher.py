@@ -1,8 +1,9 @@
-from configparser import ConfigParser
 import cv2
 import numpy as np
 import time
 import threading
+import logging
+from configparser import ConfigParser
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.action_chains import ActionChains
 from web_manipulation.connect_to_wallet import ConnectWallet
@@ -10,6 +11,7 @@ from .helper import ImageHelper
 from crypto_automation.shared.thread_helper import Thread
 import win32api, win32con
 from win32con import *
+from crypto_automation.web_manipulation.helper import SeleniumHelper
 
 #Scroll one up
 
@@ -17,10 +19,12 @@ from win32con import *
 class GameStatusWatcher:
     def __init__(self, webdriver: WebDriver, config: ConfigParser, wallethelper: ConnectWallet):
         self.webdriver = webdriver
-        self.__config = config
         self.image_helper = ImageHelper()
+        self.__selenium_helper = SeleniumHelper(config)
+        self.__config = config        
         self.wallet_helper = wallethelper
         self.lock = threading.Lock()
+        
 
 
     def start_game(self):
@@ -52,6 +56,11 @@ class GameStatusWatcher:
     def __verify_and_handle_game_error(self):
         error = self.__wait_until_match_is_found( self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
+            self.webdriver.refresh()
+            self.__connect_wallet_and_start(True)
+
+        expected_screen = self.__wait_until_match_is_found( self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
+        if expected_screen == None:
             self.webdriver.refresh()
             self.__connect_wallet_and_start(True)
 
@@ -183,15 +192,28 @@ class GameStatusWatcher:
 
     #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
-        while True:
+        while True:            
             with self.lock:
-                if positional_arguments:
-                    method(*positional_arguments)
-                elif keyword_arguments:
-                    method(**keyword_arguments)
-                elif positional_arguments and keyword_arguments: 
-                    method(*positional_arguments, **keyword_arguments)
-                else:
-                    method()
+                try:
+                    if positional_arguments:
+                        method(*positional_arguments)
+                    elif keyword_arguments:
+                        method(**keyword_arguments)
+                    elif positional_arguments and keyword_arguments: 
+                        method(*positional_arguments, **keyword_arguments)
+                    else:
+                        method()
+                except BaseException as ex:
+                    logging.error('Error:' + ex.with_traceback())                    
+                    self.__restart_driver()
             time.sleep(retrytime) 
+
+
+    def __restart_driver(self):
+        logging.warning('Restarting automation:')
+        self.webdriver.quit()
+        self.webdriver = self.__selenium_helper.setup_driver()
+        self.wallet_helper.configure_wallet()
+        self.webdriver.get(self.__config['URL']['bomb_crypto']) 
+        self.__connect_wallet_and_start()
 #endregion

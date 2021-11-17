@@ -21,11 +21,11 @@ def show_info(image, isgray=False):
 
 image_helper = ImageHelper()
 
-heroes_list_image = "../images/test/error2_screen.png"
-work_button_template = "../images/error_message.png"
+image = "../images/test/error_screen.png"
+template = "../images/map_screen_validator.png"
 
-list_hero = cv2.imread(heroes_list_image) 
-template = cv2.imread(work_button_template) 
+list_hero = cv2.imread(image) 
+template = cv2.imread(template) 
 
 points = image_helper.find_exact_matches_position(list_hero, template,0.05)
 

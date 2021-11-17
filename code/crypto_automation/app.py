@@ -4,27 +4,43 @@ from image_processing.game_status_watcher import GameStatusWatcher
 from  shared.web_extension_helper import update_extension
 import configparser
 import keyring
+import logging
 
 config_filename = "settings.ini"
 
 config = configparser.ConfigParser()
 config.read(config_filename)
 
+logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['LOG']['log_path'], encoding='utf-8', level=logging.DEBUG)
 
-def run():
-    update_extension(config['WEBDRIVER']['metamaskextension'],config['WEBDRIVER']['extension_url_download'])
+def run():   
+    logging.info('Starting automation.')
 
-    secure_passwords()
+    error = False
 
-    selenium_helper = SeleniumHelper(config)
+    try:
+        update_extension(config['WEBDRIVER']['metamaskextension'],config['WEBDRIVER']['extension_url_download'])
 
-    driver = selenium_helper.setup_driver()
+        secure_passwords()
 
-    wallet_helper = ConnectWallet(driver, config)
-    
-    game_status_watcher = GameStatusWatcher(driver, config, wallet_helper)
+        selenium_helper = SeleniumHelper(config)
 
-    game_status_watcher.start_game()
+        driver = selenium_helper.setup_driver()
+
+        wallet_helper = ConnectWallet(driver, config)
+
+        game_status_watcher = GameStatusWatcher(driver, config, wallet_helper)
+
+        game_status_watcher.start_game()
+
+    except BaseException as ex:
+        error = True
+        logging.error('Error:' + ex.with_traceback())
+        logging.warning('Restarting automation:')
+        run()        
+
+    if error == False:
+        logging.info('Automation started.')
     
 
 def secure_passwords():

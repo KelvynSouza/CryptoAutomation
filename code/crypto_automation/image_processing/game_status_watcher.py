@@ -25,8 +25,7 @@ class GameStatusWatcher:
         self.__config = config        
         self.wallet_helper = wallethelper
         self.lock = threading.Lock()
-        
-
+  
 
     def start_game(self):
         self.wallet_helper.configure_wallet()

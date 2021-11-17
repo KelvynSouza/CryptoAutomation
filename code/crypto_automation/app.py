@@ -12,10 +12,10 @@ config_filename = "settings.ini"
 config = configparser.ConfigParser()
 config.read(config_filename)
 
-logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['LOG']['log_path'], encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['LOG']['log_path'], encoding='utf-8', level=logging.WARNING)
 
 def run():   
-    logging.info('Starting automation.')
+    logging.warning('Starting automation.')
 
     error = False
 
@@ -42,7 +42,7 @@ def run():
         run()        
 
     if error == False:
-        logging.info('Automation started.')
+        logging.warning('Automation started.')
     
 
 def secure_passwords():

@@ -97,9 +97,9 @@ class GameStatusWatcher:
             result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
 
             if(result_active_match):
-                last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
+                first_active_button_x, first_active_button_y  = result_active_match[0]
 
-                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)            
+                self.__click_and_scroll_down(first_active_button_x, first_active_button_y)            
 
                 result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
@@ -111,9 +111,9 @@ class GameStatusWatcher:
                 self.__click_element_by_position(x, y)
                 time.sleep(0.5)
             
-            last_button_x, last_button_y = result_match[len(result_match)-1]
+            first_button_x, first_button_y = result_match[0]
             
-            self.__click_and_scroll_down(last_button_x, last_button_y)
+            self.__click_and_scroll_down(first_button_x, first_button_y)
 
             result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 

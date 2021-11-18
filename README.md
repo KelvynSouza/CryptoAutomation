@@ -10,7 +10,7 @@ apos clonar, entre na pasta *code* e realize os comandos no cmd:
 - intalar dependencias do projeto: pip install -r .\crypto_automation\requirements.txt
 
 Para iniciar a automação, na pasta code realizar o comando:
-python crypto_automation\___main___.py
+python crypto_automation\\___main___.py
 
 IMPORTANTE:
 Caso ao tentar clicar no "Connect Wallet" o navegador fechar, teste e ajuste a config click_y_offset,

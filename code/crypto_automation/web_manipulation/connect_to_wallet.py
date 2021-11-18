@@ -40,13 +40,13 @@ class ConnectWallet:
     def __configure_wallet_network(self):
         self.__selenium_helper.find_and_click_bylocator(self.__driver, By.CSS_SELECTOR, ".network-display.chip")
 
-        self.__selenium_helper.find_and_click_bytext(self.__driver, "RPC personalizada")
+        self.__selenium_helper.find_and_click_bytext(self.__driver, "Adicionar rede")
 
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-name",  self.__config['WALLETNETWORK']['networkname'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "rpc-url", self.__config['WALLETNETWORK']['newrpcurl'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "chainId", self.__config['WALLETNETWORK']['chainid'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "network-ticker", self.__config['WALLETNETWORK']['symbol'])
-        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "block-explorer-url", self.__config['WALLETNETWORK']['blockexplorerurl'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, self.__network_wallet_xpath("Nome da rede"), self.__config['WALLETNETWORK']['networkname'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, self.__network_wallet_xpath("Novo URL da RPC"), self.__config['WALLETNETWORK']['newrpcurl'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, self.__network_wallet_xpath("ID da chain"), self.__config['WALLETNETWORK']['chainid'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, self.__network_wallet_xpath("Símbolo da moeda"), self.__config['WALLETNETWORK']['symbol'])
+        self.__selenium_helper.find_and_write_input(self.__driver, By.XPATH, self.__network_wallet_xpath("URL do Block Explorer"), self.__config['WALLETNETWORK']['blockexplorerurl'])
 
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Salvar")
 
@@ -90,3 +90,7 @@ class ConnectWallet:
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Assinar")
 
         self.__selenium_helper.change_tab(self.__driver, True)
+
+
+    def __network_wallet_xpath(self, name):
+        return f"//*[contains(text(), '{name}')]//ancestor::div[@class='form-field']//input"

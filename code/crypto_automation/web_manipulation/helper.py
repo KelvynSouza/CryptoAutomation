@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
-from fake_useragent import UserAgent
+from fake_useragent import UserAgent, FakeUserAgentError 
 import time
 
 class SeleniumHelper:  
@@ -11,10 +11,15 @@ class SeleniumHelper:
 
 
     def setup_driver(self):
-        chrome_options = Options()    
-        ua = UserAgent()
-        userAgent = ua.random
-        chrome_options.add_argument(f'user-agent={userAgent}') 
+        chrome_options = Options()  
+
+        try:
+            ua = UserAgent()
+            userAgent = ua.random
+            chrome_options.add_argument(f'user-agent={userAgent}') 
+        except FakeUserAgentError:
+            pass         
+        
         chrome_options.add_argument("--disable-plugins-discovery")
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])

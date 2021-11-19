@@ -14,7 +14,6 @@ import win32api, win32con
 from win32con import *
 from crypto_automation.web_manipulation.helper import SeleniumHelper
 from crypto_automation.windows_actions.helper import WindowsActionsHelper
-import pyautogui, sys
 
 
 class GameStatusWatcher:
@@ -130,15 +129,6 @@ class GameStatusWatcher:
                 self.__selenium_helper.click_element_by_position(self.webdriver, x, y)
                 time.sleep(0.3)
   
-
-
-    def __click_and_scroll_down_from_package(self, x, y):
-        pyautogui.scroll(self.__config['IMAGEDETECTION'].getint('scroll_intensity'), x=x, y=y)
-    
-
-    def __click_and_drag(self, from_x, from_y, height = 0, width=0):
-        pyautogui.moveTo(from_x, from_y, 2)
-        pyautogui.drag(height, width, 2, button='left')
 
     #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):

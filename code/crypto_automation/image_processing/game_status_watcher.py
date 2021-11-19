@@ -14,8 +14,7 @@ import win32api, win32con
 from win32con import *
 from crypto_automation.web_manipulation.helper import SeleniumHelper
 from crypto_automation.windows_actions.helper import WindowsActionsHelper
-
-#Scroll one up
+import pyautogui, sys
 
 
 class GameStatusWatcher:
@@ -92,27 +91,25 @@ class GameStatusWatcher:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_button'], 25, 0.02)
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 2, 0.02)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
-            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
-            first_active_button_x, first_active_button_y  = result_active_match[0]
-            self.__windows_action_helper.click_and_scroll_down(first_active_button_x, first_active_button_y)
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_button'], 25, 0.02)
+            result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
+            if result_active_match:
+                last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
+                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)
+                result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
             count += 1
 
         count = 0
         while len(result_match) > 0 and count <= 5:                    
             for (x, y) in result_match:
-                self.__selenium_helper.click_element_by_position(self.webdriver, x, y)
-                time.sleep(0.5)
-            
-            first_button_x, first_button_y = result_match[0]
-            
-            self.__windows_action_helper.click_and_scroll_down(first_button_x, first_button_y)
-
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_button'], 25, 0.02)
+                self.__click_element_by_position(x, y)
+                time.sleep(0.5)            
+            last_button_x, last_button_y = result_match[len(result_match)-1]            
+            self.__click_and_scroll_down(last_button_x, last_button_y)
+            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
             count +=1
 
@@ -133,6 +130,15 @@ class GameStatusWatcher:
                 self.__selenium_helper.click_element_by_position(self.webdriver, x, y)
                 time.sleep(0.3)
   
+
+
+    def __click_and_scroll_down_from_package(self, x, y):
+        pyautogui.scroll(self.__config['IMAGEDETECTION'].getint('scroll_intensity'), x=x, y=y)
+    
+
+    def __click_and_drag(self, from_x, from_y, height = 0, width=0):
+        pyautogui.moveTo(from_x, from_y, 2)
+        pyautogui.drag(height, width, 2, button='left')
 
     #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):

@@ -13,8 +13,7 @@ from crypto_automation.shared.thread_helper import Thread
 import win32api, win32con
 from win32con import *
 from crypto_automation.web_manipulation.helper import SeleniumHelper
-
-#Scroll one up
+import pyautogui, sys
 
 
 class GameStatusWatcher:
@@ -24,7 +23,7 @@ class GameStatusWatcher:
         self.__selenium_helper = SeleniumHelper(config)
         self.__config = config        
         self.wallet_helper = wallethelper
-        self.lock = threading.Lock()
+        self.lock = threading.Lock()        
   
 
     def start_game(self):
@@ -90,32 +89,27 @@ class GameStatusWatcher:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
+        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 2, 0.02)
 
         count = 0
-        while len(result_match) == 0 and count <= 2:
+        while len(result_match) == 0 and count <= 5:
             result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
-
-            if(result_active_match):
+            if result_active_match:
                 last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
-
-                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)            
-
+                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)
                 result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
+            count += 1
 
-            count +=1
-
-
-        while len(result_match):
+        count = 0
+        while len(result_match) > 0 and count <= 5:                    
             for (x, y) in result_match:
                 self.__click_element_by_position(x, y)
-                time.sleep(0.5)
-            
-            last_button_x, last_button_y = result_match[len(result_match)-1]
-            
+                time.sleep(0.5)            
+            last_button_x, last_button_y = result_match[len(result_match)-1]            
             self.__click_and_scroll_down(last_button_x, last_button_y)
-
             result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
+
+            count +=1
 
 
 #region Util
@@ -187,12 +181,21 @@ class GameStatusWatcher:
         actions.move_by_offset(x_position, y_position).click().perform()
 
 
-    def __click_and_scroll_down(self, x, y):
+    def __click_and_scroll_down(self, x, y):       
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x, y,0,0)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)   
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0) 
         for x in range(self.__config['IMAGEDETECTION'].getint('scroll_intensity')):  
             win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)
+
+
+    def __click_and_scroll_down_from_package(self, x, y):
+        pyautogui.scroll(self.__config['IMAGEDETECTION'].getint('scroll_intensity'), x=x, y=y)
+    
+
+    def __click_and_drag(self, from_x, from_y, height = 0, width=0):
+        pyautogui.moveTo(from_x, from_y, 2)
+        pyautogui.drag(height, width, 2, button='left')
 
     #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):

@@ -1,9 +1,10 @@
 import cv2
+import time
 import numpy as np
 from matplotlib import pyplot as plt
 
 class ImageHelper:
-    def find_exact_match_position(self, image, template, confidence_level = 0.1):
+    def __find_exact_match_position(self, image, template, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
         image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -41,7 +42,7 @@ class ImageHelper:
             return None
 
 
-    def find_exact_matches_position(self, image, template, confidence_level = 0.1):
+    def __find_exact_matches_position(self, image, template, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
         image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -79,8 +80,36 @@ class ImageHelper:
             
         return points
 
-    #region util 
-    def show_info(image, isgray=False):
+
+    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
+        duration = 0
+        result = None        
+        template = cv2.imread(template_path)    
+
+        while result == None and duration < timeout:
+            time.sleep(1)
+            duration += 1
+            website_picture = method_image_to_validate(*method_image_to_validate_args) 
+            result = self.__find_exact_match_position(website_picture, template, confidence_level)  
+
+        return result
+
+
+    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
+        duration = 0
+        result = None        
+        template = cv2.imread(template_path)    
+
+        while result == None and duration < timeout:
+            time.sleep(1)
+            duration += 1
+            website_picture = method_image_to_validate(*method_image_to_validate_args) 
+            result = self.__find_exact_matches_position(website_picture, template, confidence_level)  
+
+        return result
+
+    
+    def show_image(image, isgray=False):
         print('-----------------------------------------------------')    
         print('shape:', image.shape, 'and', 'size:', image.size)    
         print(image.dtype)
@@ -91,4 +120,4 @@ class ImageHelper:
             plt.imshow(image[:,:,::-1])
 
         plt.show()
-        #endregion
+    

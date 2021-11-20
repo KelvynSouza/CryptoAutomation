@@ -7,7 +7,6 @@ from .helper import SeleniumHelper
 import keyring  
 
 class ConnectWallet:
-
     def __init__(self, driver: WebDriver, config: ConfigParser):
         self.__driver = driver
         self.__config = config

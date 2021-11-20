@@ -54,13 +54,13 @@ class GameStatusWatcher:
 
 
     def __verify_and_handle_game_error(self):
-        error = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['error_message'], 2 , 0.05)
+        error = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
             self.webdriver.refresh()
             self.__connect_wallet_and_start(True)
 
-        expected_screen = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
+        expected_screen = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
             logging.error('game on wrong page, refreshing page.')
             self.webdriver.refresh()
@@ -68,7 +68,7 @@ class GameStatusWatcher:
 
 
     def __verify_and_handle_newmap(self):
-        newmap = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['newmap_button'], 2 , 0.05)
+        newmap = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['newmap_button'], 2 , 0.05)
         if newmap:
             logging.warning('entering new map')
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
@@ -81,8 +81,8 @@ class GameStatusWatcher:
         
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        if(self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_active_button'], timeout, 0.02) 
-        or self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), self.__config['TEMPLATES']['work_button'], timeout, 0.02)):
+        if(self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['work_active_button'], timeout, 0.02) 
+        or self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['work_button'], timeout, 0.02)):
             self.__click_all_work_buttons()
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
@@ -90,39 +90,39 @@ class GameStatusWatcher:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 2, 0.02)
+        result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['work_button'], 2, 0.02)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
-            result_active_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
+            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver),self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
             if result_active_match:
                 last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
-                self.__click_and_scroll_down(last_active_button_x, last_active_button_y)
-                result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
+                self.__windows_action_helper.click_and_scroll_down(last_active_button_x, last_active_button_y)
+                result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['work_button'], 25, 0.02)
             count += 1
 
         count = 0
         while len(result_match) > 0 and count <= 5:                    
             for (x, y) in result_match:
-                self.__click_element_by_position(x, y)
+                self.__selenium_helper.click_element_by_position(self.webdriver, x, y)
                 time.sleep(0.5)            
             last_button_x, last_button_y = result_match[len(result_match)-1]            
-            self.__click_and_scroll_down(last_button_x, last_button_y)
-            result_match = self.__wait_all_until_match_is_found(self.__config['TEMPLATES']['work_button'], 25, 0.02)
+            self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)
+            result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), self.__config['TEMPLATES']['work_button'], 25, 0.02)
 
             count +=1
 
 
 #region Util
     def __find_and_click_by_template(self, template_path, confidence_level = 0.1):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level)
+        result_match = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level)
 
         if result_match:
             self.__selenium_helper.click_element_by_position(self.webdriver, result_match.x, result_match.y)
 
 
     def __find_all_and_click_by_template(self, template_path):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(), template_path, self.__config['TIMEOUT'].getint('imagematching'))
+        result_match = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv(self.webdriver), template_path, self.__config['TIMEOUT'].getint('imagematching'))
 
         if result_match:
             for (x, y) in result_match:

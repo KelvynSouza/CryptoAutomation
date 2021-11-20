@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from .helper import SeleniumHelper
+from crypto_automation.commands.web_manipulation.helper import SeleniumHelper
 import keyring  
 
 class ConnectWallet:

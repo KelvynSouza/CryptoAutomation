@@ -1,12 +1,12 @@
-from web_manipulation.helper import SeleniumHelper
-from web_manipulation.connect_to_wallet import ConnectWallet
-from image_processing.game_status_watcher import GameStatusWatcher
-from  shared.web_extension_helper import update_extension
+from commands.web_manipulation.helper import SeleniumHelper
+from commands.game_watcher.connect_to_wallet import ConnectWallet
+from commands.game_watcher.game_status_watcher import GameStatusWatcher
+from  commands.shared.web_extension_helper import update_extension
 import configparser
 import keyring
 import logging
 import traceback
-from shared.os_helper import create_log_folder
+from commands.shared.os_helper import create_log_folder
 
 config_filename = "settings.ini"
 

@@ -7,13 +7,13 @@ import traceback
 from configparser import ConfigParser
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.action_chains import ActionChains
-from web_manipulation.connect_to_wallet import ConnectWallet
-from .helper import ImageHelper
-from crypto_automation.shared.thread_helper import Thread
+from .connect_to_wallet import ConnectWallet
+from crypto_automation.commands.image_processing.helper import ImageHelper
+from crypto_automation.commands.shared.thread_helper import Thread
 import win32api, win32con
 from win32con import *
-from crypto_automation.web_manipulation.helper import SeleniumHelper
-from crypto_automation.windows_actions.helper import WindowsActionsHelper
+from crypto_automation.commands.web_manipulation.helper import SeleniumHelper
+from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 
 
 class GameStatusWatcher:

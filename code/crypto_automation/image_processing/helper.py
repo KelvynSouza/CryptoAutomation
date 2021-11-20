@@ -81,7 +81,7 @@ class ImageHelper:
         return points
 
 
-    def wait_until_match_is_found(self, method_image_to_validate, template_path, timeout, confidence_level = 0.1): 
+    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -89,13 +89,13 @@ class ImageHelper:
         while result == None and duration < timeout:
             time.sleep(1)
             duration += 1
-            website_picture = method_image_to_validate() 
+            website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.__find_exact_match_position(website_picture, template, confidence_level)  
 
         return result
 
 
-    def wait_all_until_match_is_found(self, method_image_to_validate, template_path, timeout, confidence_level = 0.1): 
+    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -103,7 +103,7 @@ class ImageHelper:
         while result == None and duration < timeout:
             time.sleep(1)
             duration += 1
-            website_picture = method_image_to_validate() 
+            website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.__find_exact_matches_position(website_picture, template, confidence_level)  
 
         return result

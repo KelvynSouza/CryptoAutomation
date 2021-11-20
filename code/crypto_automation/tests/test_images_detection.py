@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from helper import ImageHelper
+from crypto_automation.image_processing.helper import ImageHelper
 
 
 #region Util

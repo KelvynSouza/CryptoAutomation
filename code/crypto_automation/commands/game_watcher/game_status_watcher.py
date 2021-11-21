@@ -30,7 +30,7 @@ class GameStatusWatcher:
     def start_game(self):
         self.wallet_helper.configure_wallet()
 
-        self.webdriver.get(self.__config['URL']['bomb_crypto'])  
+        self.webdriver.get(self.__config['COMMON']['bomb_crypto_url'])  
 
         self.__connect_wallet_and_start()
 
@@ -48,9 +48,11 @@ class GameStatusWatcher:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
+        self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [self.webdriver], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05, True)
+
 
     def __security_check(self):
-        assert self.webdriver.current_url == self.__config['URL']['bomb_crypto']
+        assert self.webdriver.current_url == self.__config['COMMON']['bomb_crypto_url']
 
 
     def __verify_and_handle_game_error(self):
@@ -87,6 +89,7 @@ class GameStatusWatcher:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
+        self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [self.webdriver], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05, True)
 
 
     def __click_all_work_buttons(self):
@@ -154,6 +157,6 @@ class GameStatusWatcher:
         self.webdriver.quit()
         self.webdriver = self.__selenium_helper.setup_driver()
         self.wallet_helper.configure_wallet()
-        self.webdriver.get(self.__config['URL']['bomb_crypto']) 
+        self.webdriver.get(self.__config['COMMON']['bomb_crypto_url']) 
         self.__connect_wallet_and_start()
 #endregion

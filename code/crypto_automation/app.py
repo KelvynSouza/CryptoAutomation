@@ -11,9 +11,10 @@ config_filename = "settings.ini"
 config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
 config.read(config_filename)
 
-create_log_folder(config['LOG']['log_path'])
+create_log_folder(config['COMMON']['log_path'])
 
-logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['LOG']['log_path'], encoding='utf-8', level=logging.WARNING)
+logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['COMMON']['log_path'], encoding='utf-8', level=logging.WARNING)
+
 
 def run():   
     logging.warning('Starting automation.')
@@ -21,15 +22,18 @@ def run():
     error = False
 
     try:
-        selenium_helper = SeleniumHelper(config)
+        if config['COMMON'].getint('automation_type') == 1:
+            selenium_helper = SeleniumHelper(config)
 
-        driver = selenium_helper.setup_driver()
+            driver = selenium_helper.setup_driver()
 
-        wallet_helper = ConnectWallet(driver, config)
+            wallet_helper = ConnectWallet(driver, config)
 
-        game_status_watcher = GameStatusWatcher(driver, config, wallet_helper)
+            game_status_watcher = GameStatusWatcher(driver, config, wallet_helper)
 
-        game_status_watcher.start_game()
+            game_status_watcher.start_game()
+        else:
+            print()
 
     except BaseException as ex:
         error = True

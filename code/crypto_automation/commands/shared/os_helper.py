@@ -1,6 +1,7 @@
 import os
 import subprocess
-import random
+import win32api, win32con, win32gui 
+
 
 def create_log_folder(dirName):
     try:
@@ -12,11 +13,3 @@ def create_log_folder(dirName):
 
 def execute_system_command(commands:list):
     return subprocess.run(commands)
-
-
-def random_waitable_number(config):
-    return random.uniform(config['COMMON']['random_waits_from'], config['COMMON']['random_waits_to'])
-
-
-def random_number_between(min, max):
-    return random.uniform(min, max)

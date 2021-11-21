@@ -16,7 +16,7 @@ class SeleniumHelper:
 
     def setup_driver(self):
         if(self.__config['WEBDRIVER'].getboolean('always_update')):
-            update_extension(self.__config['WEBDRIVER']['metamaskextension'],self.__config['WEBDRIVER']['extension_url_download'])
+            update_extension(self.__config['WEBDRIVER']['metamask_extension'],self.__config['WEBDRIVER']['extension_url_download'])
         
         chrome_options = Options()  
 
@@ -31,7 +31,7 @@ class SeleniumHelper:
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
-        chrome_options.add_extension(self.__config['WEBDRIVER']['metamaskextension'])
+        chrome_options.add_extension(self.__config['WEBDRIVER']['metamask_extension'])
         driver = uc.Chrome(options=chrome_options)
         
         driver.delete_all_cookies()

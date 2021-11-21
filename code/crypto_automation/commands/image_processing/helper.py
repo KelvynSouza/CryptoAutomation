@@ -81,7 +81,7 @@ class ImageHelper:
         return points
 
 
-    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
+    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -92,10 +92,13 @@ class ImageHelper:
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.__find_exact_match_position(website_picture, template, confidence_level)  
 
+        if result == None and should_throw_exception == True:
+            raise Exception("Element not found on screen!")
+
         return result
 
 
-    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1): 
+    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -105,6 +108,9 @@ class ImageHelper:
             duration += 1
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.__find_exact_matches_position(website_picture, template, confidence_level)  
+
+        if result == None and should_throw_exception == True:
+            raise Exception("Element not found on screen!")
 
         return result
 

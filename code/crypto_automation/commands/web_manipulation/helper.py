@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 from fake_useragent import UserAgent, FakeUserAgentError 
+from  crypto_automation.commands.shared.web_extension_helper import update_extension
 import time
 import cv2
 import numpy as np
@@ -14,6 +15,8 @@ class SeleniumHelper:
 
 
     def setup_driver(self):
+        update_extension(self.__config['WEBDRIVER']['metamaskextension'],self.__config['WEBDRIVER']['extension_url_download'])
+        
         chrome_options = Options()  
 
         try:

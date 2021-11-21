@@ -11,6 +11,7 @@ class ConnectWallet:
         self.__driver = driver
         self.__config = config
         self.__selenium_helper =  SeleniumHelper(config)
+        self.__secure_passwords()
 
 
     def configure_wallet(self):
@@ -29,7 +30,9 @@ class ConnectWallet:
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Importar")
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Tudo pronto")
 
-        self.__configure_wallet_network()        
+        self.__configure_wallet_network()   
+
+        self.__configure_idle_deactivation_timeout()     
     
         self.__driver.close()
 
@@ -54,6 +57,18 @@ class ConnectWallet:
         )
 
         assert "BNB" in element.text
+        
+
+    def __configure_idle_deactivation_timeout(self):
+        self.__selenium_helper.find_and_click_bylocator(self.__driver, By.CSS_SELECTOR, ".network-display.chip")
+
+        self.__selenium_helper.find_and_click_bytext(self.__driver, "Adicionar rede")
+
+        self.__selenium_helper.find_and_click_bytext(self.__driver, "Avançadas")
+
+        self.__selenium_helper.find_and_write_input(self.__driver, By.ID, "autoTimeout", "9999")
+
+        self.__selenium_helper.find_and_click_bylocator(self.__driver, By.XPATH, "//*[@id='autoTimeout']//ancestor::div[position()=3]//button")        
 
 
     def connect_wallet_to_game(self, reconnect  = False):
@@ -89,6 +104,19 @@ class ConnectWallet:
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Assinar")
 
         self.__selenium_helper.change_tab(self.__driver, True)
+
+
+    def __secure_passwords(self):
+        if self.__config['SECURITY'].getboolean('ispasswordsecured') == False:
+            keyring.set_password(self.__config['SECURITY']['serviceid'], "secret_phrase", self.__config['LOGIN']['secretphrase'])
+            keyring.set_password(self.__config['SECURITY']['serviceid'], "secret_password", self.__config['LOGIN']['newpassword'])
+
+            self.__config['LOGIN']['secretphrase'] = "Secured"
+            self.__config['LOGIN']['newpassword'] = "Secured"
+            self.__config['SECURITY']['ispasswordsecured'] = "True"
+
+            with open(self.__config['COMMON']['settings_name'], 'w') as configfile:
+                self.__config.write(configfile)
 
 
     def __network_wallet_xpath(self, name):

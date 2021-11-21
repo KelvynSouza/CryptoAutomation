@@ -1,6 +1,6 @@
 from commands.web_manipulation.helper import SeleniumHelper
-from commands.game_watcher.connect_to_wallet import ConnectWallet
-from commands.game_watcher.game_status_watcher import GameStatusWatcher
+from commands.game_watcher_selenium.connect_to_wallet import ConnectWallet
+from commands.game_watcher_selenium.game_status_watcher import GameStatusWatcherSelenium
 import configparser
 import logging
 import traceback
@@ -29,7 +29,7 @@ def run():
 
             wallet_helper = ConnectWallet(driver, config)
 
-            game_status_watcher = GameStatusWatcher(driver, config, wallet_helper)
+            game_status_watcher = GameStatusWatcherSelenium(driver, config, wallet_helper)
 
             game_status_watcher.start_game()
         else:

@@ -15,7 +15,8 @@ class SeleniumHelper:
 
 
     def setup_driver(self):
-        update_extension(self.__config['WEBDRIVER']['metamaskextension'],self.__config['WEBDRIVER']['extension_url_download'])
+        if(self.__config['WEBDRIVER'].getboolean('always_update')):
+            update_extension(self.__config['WEBDRIVER']['metamaskextension'],self.__config['WEBDRIVER']['extension_url_download'])
         
         chrome_options = Options()  
 

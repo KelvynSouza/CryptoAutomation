@@ -155,9 +155,13 @@ class GameStatusWatcherActions:
 
 
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
+        error = False
         while True:            
-            with self.lock:
+            with self.lock:                
                 try:
+                    if error:
+                        self.__restart_game()
+                        error = False
                     if positional_arguments:
                         method(*positional_arguments)
                     elif keyword_arguments:
@@ -168,7 +172,7 @@ class GameStatusWatcherActions:
                         method()
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
-                    self.__restart_game()
+                    error = True                    
             time.sleep(retrytime) 
 
 

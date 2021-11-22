@@ -59,7 +59,7 @@ def run():
         if is_browser_open:
             windows_helper.kill_process(config['WEBDRIVER']['chrome_exe_name'])
 
-        if error < 5:
+        if error < 10:
             run()        
 
     if error == 0:

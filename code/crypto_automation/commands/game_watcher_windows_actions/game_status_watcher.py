@@ -123,7 +123,7 @@ class GameStatusWatcherActions:
         count = 0
         while len(result_match) > 0 and count <= 5:                    
             for (x, y) in result_match:
-                self.__windows_action_helper.click_on(self.webdriver, x, y)
+                self.__windows_action_helper.click_on(x, y)
                 time.sleep(random_waitable_number())            
             last_button_x, last_button_y = result_match[len(result_match)-1]            
             self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)

@@ -54,10 +54,10 @@ def run():
 
         windows_helper = WindowsActionsHelper(config)
 
-        is_browser_open = windows_helper.process_exists("chrome")
+        is_browser_open = windows_helper.process_exists(config['WEBDRIVER']['chrome_exe_name'])
 
         if is_browser_open:
-            windows_helper.kill_process("chrome.exe")
+            windows_helper.kill_process(config['WEBDRIVER']['chrome_exe_name'])
 
         if error < 5:
             run()        

@@ -108,7 +108,7 @@ class ImageHelper:
         while result == None and duration < timeout:
             time.sleep(1)
             duration += 1
-            website_picture = method_image_to_validate() 
+            website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.__find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:

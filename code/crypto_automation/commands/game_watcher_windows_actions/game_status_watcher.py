@@ -34,6 +34,10 @@ class GameStatusWatcherActions:
 
             self.__windows_action_helper.press_special_buttons("enter")
 
+            self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
+                                                     [], self.__config['COMMON']['bomb_crypto_url'],
+                                                         self.__config['TIMEOUT'].getint('imagematching'), 0.05)
+
             self.security_check()
 
 #region Util
@@ -74,6 +78,11 @@ class GameStatusWatcherActions:
                         method()
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
+                    self.restart_browser()
             time.sleep(retrytime) 
 
+
+    def restart_browser(self):
+        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
+        self.__open_chrome_and_goto_game()
 #endregion

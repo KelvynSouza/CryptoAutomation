@@ -64,6 +64,8 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
+        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05, True)
+
 
     def __verify_and_handle_game_error(self):
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)

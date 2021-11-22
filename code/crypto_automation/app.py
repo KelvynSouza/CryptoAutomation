@@ -1,11 +1,11 @@
-from commands.web_manipulation.helper import SeleniumHelper
-from commands.game_watcher_selenium.connect_to_wallet import ConnectWallet
-from commands.game_watcher_selenium.game_status_watcher import GameStatusWatcherSelenium
-from commands.game_watcher_windows_actions.game_status_watcher import GameStatusWatcherActions
 import configparser
 import logging
 import traceback
 import keyring
+from commands.web_manipulation.helper import SeleniumHelper
+from commands.game_watcher_selenium.connect_to_wallet import ConnectWallet
+from commands.game_watcher_selenium.game_status_watcher import GameStatusWatcherSelenium
+from commands.game_watcher_windows_actions.game_status_watcher import GameStatusWatcherActions
 from commands.shared.os_helper import create_log_folder
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 

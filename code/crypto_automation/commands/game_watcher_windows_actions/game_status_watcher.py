@@ -1,4 +1,3 @@
-import numpy as np
 import time
 import threading
 import logging
@@ -10,6 +9,7 @@ from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Thread
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
+
 
 class GameStatusWatcherActions:
     def __init__(self, config: ConfigParser):
@@ -32,14 +32,14 @@ class GameStatusWatcherActions:
                                                                         self.__config['TEMPLATES']['incognito_icon'], 
                                                                         self.__config["WEBDRIVER"]["chrome_args"])
 
-            self.open_game_website()
+            self.__open_game_website()
 
-            self.security_check()
+            self.__security_check()
 
-            self.enter_game()
+            self.__enter_game()
 
 
-    def open_game_website(self):
+    def __open_game_website(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['incognito_icon'], 0.05)
 
         self.__find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['COMMON']['bomb_crypto_url'], 0.05)
@@ -51,7 +51,7 @@ class GameStatusWatcherActions:
                                                          self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
     
-    def enter_game(self):
+    def __enter_game(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
@@ -69,12 +69,12 @@ class GameStatusWatcherActions:
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
-            self.restart_game()
+            self.__restart_game()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
             logging.error('game on wrong page, refreshing page.')
-            self.restart_game()
+            self.__restart_game()
 
 
     def __verify_and_handle_newmap(self):
@@ -121,6 +121,8 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.02)
             count +=1
+
+
 #region Util
     
     def __find_and_click_by_template(self, template_path, confidence_level = 0.05):
@@ -137,14 +139,13 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)            
 
 
-    def security_check(self):
+    def __security_check(self):
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['url_validate'], 
                                                                     self.__config['TIMEOUT'].getint('imagematching') , 
                                                                     0.02, True)
 
 
-    #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
         while True:            
             with self.lock:
@@ -159,11 +160,11 @@ class GameStatusWatcherActions:
                         method()
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
-                    self.restart_game()
+                    self.__restart_game()
             time.sleep(retrytime) 
 
 
-    def restart_game(self):
+    def __restart_game(self):
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
 #endregion

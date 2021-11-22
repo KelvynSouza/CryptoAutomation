@@ -28,7 +28,7 @@ def take_screenshot():
 image_helper = ImageHelper()
 
 #image = "../resources/images/test/new_map.png"
-template_path = "../resources/images/chrome/url_validate.png"
+template_path = "../resources/images/chrome/restart_button.png"
 
 list_hero = take_screenshot()
 #template = cv2.imread(template) 

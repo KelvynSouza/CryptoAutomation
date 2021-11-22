@@ -1,5 +1,3 @@
-import cv2
-import numpy as np
 import time
 import threading
 import logging
@@ -12,7 +10,6 @@ from crypto_automation.commands.windows_actions.helper import WindowsActionsHelp
 from configparser import ConfigParser
 from selenium.webdriver.chrome.webdriver import WebDriver
 from .connect_to_wallet import ConnectWallet
-
 
 
 class GameStatusWatcherSelenium:
@@ -132,7 +129,6 @@ class GameStatusWatcherSelenium:
                 time.sleep(0.3)
   
 
-    #usage example: self.__thread_sensitive(method, 2, ['spam'], {'ham': 'ham'})
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
         while True:            
             with self.lock:

@@ -15,7 +15,7 @@ class SeleniumHelper:
 
 
     def setup_driver(self):
-        if(self.__config['WEBDRIVER'].getboolean('always_update')):
+        if(self.__config['WEBDRIVER'].getboolean('always_update_extension')):
             update_extension(self.__config['WEBDRIVER']['metamask_extension'],self.__config['WEBDRIVER']['extension_url_download'])
         
         chrome_options = Options()  
@@ -32,7 +32,12 @@ class SeleniumHelper:
         chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
         chrome_options.add_experimental_option("useAutomationExtension", False)
         chrome_options.add_extension(self.__config['WEBDRIVER']['metamask_extension'])
-        driver = uc.Chrome(options=chrome_options)
+
+        if(self.__config['WEBDRIVER'].getboolean('always_update_chromedriver')):
+            driver = uc.Chrome(options=chrome_options)
+        else:            
+            driver = uc.Chrome(options=chrome_options, executable_path=self.__config['WEBDRIVER']['chromedriver_path'])
+
         
         driver.delete_all_cookies()
         driver.implicitly_wait(self.__config['TIMEOUT'].getint('webscraping'))  

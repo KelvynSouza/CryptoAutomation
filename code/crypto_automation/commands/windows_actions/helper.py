@@ -1,13 +1,18 @@
-import win32api, win32con, win32gui
-from win32con import *
+from os import times
+import win32api, win32con, win32gui, win32ui
 import pyautogui
+import os
 import subprocess
 import numpy as np
+from win32con import *
+from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
+from crypto_automation.commands.shared.os_helper import execute_system_command
 
 class WindowsActionsHelper:
-    def __init__(self, config):
+    def __init__(self, config, image_helper: ImageHelper = None):
         self.__config = config
+        self.__image_helper = image_helper
         
 
     def click_on(self, x, y, number_clicks = 1):
@@ -34,28 +39,46 @@ class WindowsActionsHelper:
 
     def write_at(self, x, y, text):
         self.click_on(x, y)
-        pyautogui.typewrite(text, interval=random_number_between(0.3, 0.6))
+        pyautogui.typewrite(text, interval=random_number_between(0.1, 0.4))
 
 
-    def press_special_buttons(button):
+    def press_special_buttons(self, button):
         pyautogui.press(button)
 
 
-    def take_screenshot():
-        image = pyautogui.screenshot()
-        return np.array(image)
-
+    def take_screenshot(self):
+        image_np = np.array(pyautogui.screenshot())
+        return image_np[:, :, ::-1].copy()  
+        
 
     def check_position_on_screen(self, x, y):
         return pyautogui.onScreen(x, y)
 
 
-    def open_and_maximise_front_window(self, program_path, *arguments):   
+    def open_and_maximise_front_window(self, program_path, image_validation_path, *arguments):   
         args = [program_path]
         args.extend(arguments)
-        process = subprocess.Popen(args)
-        process.wait()     
+        subprocess.Popen(args)  
+        self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
+                                                [], image_validation_path, 
+                                                    self.__config['TIMEOUT'].getint('imagematching'), 
+                                                    0.05, True)
         hwnd = win32gui.GetForegroundWindow()
         win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
 
-    
+
+    def process_exists(self, process_name): 
+        if process_name == "":
+            return False
+
+        call = 'tasklist | findstr ' + process_name    
+        output = subprocess.Popen(call, shell=True,  stdout=subprocess.PIPE, text=True)
+        stdout, _ = output.communicate() 
+        
+        last_line = stdout.strip().split('K\n')[-1]        
+        return last_line.lower().startswith(process_name.lower())
+       
+
+    def kill_process(self, process_name):
+        subprocess.call("taskkill /im "+process_name)
+        

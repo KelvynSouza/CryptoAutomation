@@ -10,8 +10,7 @@ class ConnectWallet:
     def __init__(self, driver: WebDriver, config: ConfigParser):
         self.__driver = driver
         self.__config = config
-        self.__selenium_helper =  SeleniumHelper(config)
-        self.__secure_passwords()
+        self.__selenium_helper =  SeleniumHelper(config)        
 
 
     def configure_wallet(self):
@@ -104,19 +103,6 @@ class ConnectWallet:
         self.__selenium_helper.find_and_click_bytext(self.__driver, "Assinar")
 
         self.__selenium_helper.change_tab(self.__driver, True)
-
-
-    def __secure_passwords(self):
-        if self.__config['SECURITY'].getboolean('ispasswordsecured') == False:
-            keyring.set_password(self.__config['SECURITY']['serviceid'], "secret_phrase", self.__config['LOGIN']['secretphrase'])
-            keyring.set_password(self.__config['SECURITY']['serviceid'], "secret_password", self.__config['LOGIN']['newpassword'])
-
-            self.__config['LOGIN']['secretphrase'] = "Secured"
-            self.__config['LOGIN']['newpassword'] = "Secured"
-            self.__config['SECURITY']['ispasswordsecured'] = "True"
-
-            with open(self.__config['COMMON']['settings_name'], 'w') as configfile:
-                self.__config.write(configfile)
 
 
     def __network_wallet_xpath(self, name):

@@ -4,11 +4,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class ImageHelper:
-    def __find_exact_match_position(self, image, template, confidence_level = 0.1):
+    def __find_exact_match_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
+        if should_grayscale:
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
 
         result = cv2.matchTemplate(image, template, method)
 
@@ -42,11 +43,12 @@ class ImageHelper:
             return None
 
 
-    def __find_exact_matches_position(self, image, template, confidence_level = 0.1):
+    def __find_exact_matches_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
+        if should_grayscale:
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+            template = cv2.cvtColor(template, cv2.COLOR_RGB2GRAY)
 
         result = cv2.matchTemplate(image, template, method)
 
@@ -81,7 +83,7 @@ class ImageHelper:
         return points
 
 
-    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False): 
+    def wait_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False, should_grayscale = True): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -90,7 +92,7 @@ class ImageHelper:
             time.sleep(1)
             duration += 1
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
-            result = self.__find_exact_match_position(website_picture, template, confidence_level)  
+            result = self.__find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
             raise Exception("Element not found on screen!")
@@ -98,7 +100,7 @@ class ImageHelper:
         return result
 
 
-    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False): 
+    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False, should_grayscale = True): 
         duration = 0
         result = None        
         template = cv2.imread(template_path)    
@@ -106,8 +108,8 @@ class ImageHelper:
         while result == None and duration < timeout:
             time.sleep(1)
             duration += 1
-            website_picture = method_image_to_validate(*method_image_to_validate_args) 
-            result = self.__find_exact_matches_position(website_picture, template, confidence_level)  
+            website_picture = method_image_to_validate() 
+            result = self.__find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
             raise Exception("Element not found on screen!")

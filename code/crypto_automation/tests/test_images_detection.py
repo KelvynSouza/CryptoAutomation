@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pyautogui
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 
@@ -19,20 +20,25 @@ def show_info(image, isgray=False):
 
 #endregion
 
+def take_screenshot():
+    image_np = np.array(pyautogui.screenshot())
+    return image_np[:, :, ::-1].copy() 
+
+
 image_helper = ImageHelper()
 
-image = "../images/test/new_map.png"
-template = "../images/new_map_button.png"
+#image = "../resources/images/test/new_map.png"
+template_path = "../resources/images/chrome/url_validate.png"
 
-list_hero = cv2.imread(image) 
-template = cv2.imread(template) 
+list_hero = take_screenshot()
+#template = cv2.imread(template) 
 
-list_hero = cv2.cvtColor(list_hero, cv2.COLOR_RGB2GRAY)
+#list_hero = cv2.cvtColor(list_hero, cv2.COLOR_RGB2GRAY)
 
-points = image_helper.find_exact_matches_position(list_hero, template, 0.05)
+points = image_helper.wait_all_until_match_is_found(take_screenshot, [], template_path, 2, 0.02, should_grayscale=False)
 
 for x, y in points:
-    cv2.circle(list_hero, (x, y),30,(255,0,0), 3)
+    cv2.circle(list_hero, (x, y), 5, (255,0,0), 3)
     
 show_info(list_hero)
 print('Final')

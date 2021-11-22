@@ -15,7 +15,7 @@ class WindowsActionsHelper:
         
 
     def click_on(self, x, y, number_clicks = 1):
-        pyautogui.click(x=x, y=y, clicks=number_clicks, interval=0.25, button='left')
+        pyautogui.click(x=x, y=y, clicks=number_clicks, interval=0.25, button='left', duration=random_waitable_number(self.__config))
     
 
     def click_and_drag(self, from_x, from_y, height = 0, width=0):

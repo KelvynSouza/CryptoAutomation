@@ -1,5 +1,4 @@
-from os import times
-import win32api, win32con, win32gui, win32ui
+import win32api, win32con, win32gui
 import pyautogui
 import os
 import subprocess
@@ -7,7 +6,7 @@ import numpy as np
 from win32con import *
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
-from crypto_automation.commands.shared.os_helper import execute_system_command
+
 
 class WindowsActionsHelper:
     def __init__(self, config, image_helper: ImageHelper = None):

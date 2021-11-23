@@ -20,6 +20,8 @@ class GameStatusWatcherActions:
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
         self.__error_count = 0
+        self.__error_time = None
+
 
     def start_game(self):
         self.__open_chrome_and_goto_game()
@@ -136,15 +138,15 @@ class GameStatusWatcherActions:
 
 #region Util
     
-    def __find_and_click_by_template(self, template_path, confidence_level = 0.05):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level)
+    def __find_and_click_by_template(self, template_path, confidence_level = 0.05, should_thrown = True):
+        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
 
         if result_match:
             self.__windows_action_helper.click_on(result_match.x, result_match.y)
     
 
-    def __find_and_write_by_template(self, template_path, to_write, confidence_level = 0.05):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level)
+    def __find_and_write_by_template(self, template_path, to_write, confidence_level = 0.05, should_thrown = True):
+        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
 
         if result_match:
             self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)            
@@ -161,10 +163,7 @@ class GameStatusWatcherActions:
         error = False                
         while True:            
             with self.lock:                
-                try:
-                    if error:
-                        self.__restart_game()
-                        error = False
+                try:                    
                     if positional_arguments:
                         method(*positional_arguments)
                     elif keyword_arguments:
@@ -177,6 +176,10 @@ class GameStatusWatcherActions:
                     logging.error('Error:' + traceback.format_exc())
                     error = True
                     self.check_possible_server_error()
+                finally:
+                    if error:
+                        self.__restart_game()
+                        error = False
             time.sleep(retrytime) 
 
 
@@ -184,14 +187,14 @@ class GameStatusWatcherActions:
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)
             time_difference_minutes = time_difference.total_seconds() / 60            
-            if time_difference_minutes < 3:
+            if time_difference_minutes < 5:
                 self.__error_count +=1
 
         if self.__error_count > 6:
             time.sleep(self.__config['TIMEOUT'].getint('server_error'))
             self.__error_count = 0
 
-        self.__error_time = datetime.datetime.now().time()
+        self.__error_time = datetime.datetime.now()
         
 
     def __restart_game(self):

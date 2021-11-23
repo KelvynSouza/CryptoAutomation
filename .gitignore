@@ -14,4 +14,4 @@ var/
 __pycache__/
 crypto_automation.egg-info/
 code/crypto_automation/log/*.log
-chromedriver.exe
+code/crypto_automation/log/images/*

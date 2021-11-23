@@ -129,3 +129,9 @@ class ImageHelper:
 
         plt.show()
     
+
+    def rescale_frame(self, frame, percent=30):
+        width = int(frame.shape[1] * percent/ 100)
+        height = int(frame.shape[0] * percent/ 100)
+        dim = (width, height)
+        return cv2.resize(frame, dim, interpolation =cv2.INTER_LANCZOS4)

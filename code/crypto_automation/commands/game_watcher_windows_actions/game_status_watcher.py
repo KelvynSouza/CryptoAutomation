@@ -84,6 +84,7 @@ class GameStatusWatcherActions:
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
+            self.__windows_action_helper.save_screenshot_log()
             self.__check_possible_server_error()
             self.__restart_game()
 
@@ -180,9 +181,9 @@ class GameStatusWatcherActions:
                         method()
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
+                    self.__windows_action_helper.save_screenshot_log()
+                    self.__check_possible_server_error() 
                     error = True
-                    self.__check_possible_server_error()                
-                   
             time.sleep(retrytime) 
 
 

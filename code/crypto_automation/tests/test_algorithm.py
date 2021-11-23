@@ -17,5 +17,3 @@ def check_possible_server_error():
     __error_time = datetime.datetime.now()
 
 
-for x in range(5):
-    check_possible_server_error()

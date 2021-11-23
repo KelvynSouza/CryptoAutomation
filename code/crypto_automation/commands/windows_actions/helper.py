@@ -1,8 +1,10 @@
 import win32api, win32con, win32gui
 import pyautogui
-import os
+import cv2 
 import subprocess
+import os
 import numpy as np
+from datetime import datetime
 from win32con import *
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
@@ -49,6 +51,14 @@ class WindowsActionsHelper:
         image_np = np.array(pyautogui.screenshot())
         return image_np[:, :, ::-1].copy()  
         
+
+    def save_screenshot_log(self):
+        image = self.take_screenshot()
+        image = self.__image_helper.rescale_frame(image)         
+        date_time = datetime.now().strftime("%Y-%m-%d %H_%M_%S")
+        screenshot_path = os.path.join( self.__config['COMMON']['screenshots_path'], date_time+'.png')
+        cv2.imwrite(screenshot_path, image)
+
 
     def check_position_on_screen(self, x, y):
         return pyautogui.onScreen(x, y)

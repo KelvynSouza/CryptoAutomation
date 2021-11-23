@@ -14,7 +14,7 @@ config_filename = "settings.ini"
 config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
 config.read(config_filename)
 
-create_log_folder(config['COMMON']['log_path'])
+create_log_folder(config['COMMON']['log_path'], config['COMMON']['screenshots_path'])
 
 logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['COMMON']['log_path'], encoding='utf-8', level=logging.WARNING)
 

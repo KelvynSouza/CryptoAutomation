@@ -24,7 +24,10 @@ class GameStatusWatcherActions:
 
 
     def start_game(self):
-        self.__open_chrome_and_goto_game()
+        try:
+            self.__open_chrome_and_goto_game()
+        except BaseException:
+            self.__check_possible_server_error()
         
         error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
         newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
@@ -81,7 +84,7 @@ class GameStatusWatcherActions:
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
-            self.check_possible_server_error()
+            self.__check_possible_server_error()
             self.__restart_game()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
@@ -178,12 +181,12 @@ class GameStatusWatcherActions:
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
                     error = True
-                    self.check_possible_server_error()                
+                    self.__check_possible_server_error()                
                    
             time.sleep(retrytime) 
 
 
-    def check_possible_server_error(self):
+    def __check_possible_server_error(self):
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)
             time_difference_minutes = time_difference.total_seconds() / 60            

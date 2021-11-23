@@ -1,7 +1,9 @@
+from os import times
 import time
 import threading
 import logging
 import traceback
+import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
@@ -17,7 +19,7 @@ class GameStatusWatcherActions:
         self.lock = threading.Lock()
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
-        
+        self.__error_count = 0
 
     def start_game(self):
         self.__open_chrome_and_goto_game()
@@ -77,6 +79,7 @@ class GameStatusWatcherActions:
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
+            self.check_possible_server_error()
             self.__restart_game()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
@@ -155,7 +158,7 @@ class GameStatusWatcherActions:
 
 
     def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
-        error = False
+        error = False                
         while True:            
             with self.lock:                
                 try:
@@ -172,9 +175,24 @@ class GameStatusWatcherActions:
                         method()
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
-                    error = True                    
+                    error = True
+                    self.check_possible_server_error()
             time.sleep(retrytime) 
 
+
+    def check_possible_server_error(self):
+        if self.__error_time:
+            time_difference = (datetime.datetime.now() - self.__error_time)
+            time_difference_minutes = time_difference.total_seconds() / 60            
+            if time_difference_minutes < 3:
+                self.__error_count +=1
+
+        if self.__error_count > 6:
+            time.sleep(self.__config['TIMEOUT'].getint('server_error'))
+            self.__error_count = 0
+
+        self.__error_time = datetime.datetime.now().time()
+        
 
     def __restart_game(self):
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])

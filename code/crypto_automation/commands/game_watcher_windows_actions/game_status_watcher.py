@@ -187,7 +187,7 @@ class GameStatusWatcherActions:
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)
             time_difference_minutes = time_difference.total_seconds() / 60            
-            if time_difference_minutes < 5:
+            if time_difference_minutes <= 3:
                 self.__error_count +=1
             else:
                 self.__error_count = 0

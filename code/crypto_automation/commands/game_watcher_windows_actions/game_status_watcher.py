@@ -163,7 +163,10 @@ class GameStatusWatcherActions:
         error = False                
         while True:            
             with self.lock:                
-                try:                    
+                try:    
+                    if error:
+                        self.__restart_game()
+                        error = False                
                     if positional_arguments:
                         method(*positional_arguments)
                     elif keyword_arguments:
@@ -175,11 +178,8 @@ class GameStatusWatcherActions:
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
                     error = True
-                    self.check_possible_server_error()
-                finally:
-                    if error:
-                        self.__restart_game()
-                        error = False
+                    self.check_possible_server_error()                
+                   
             time.sleep(retrytime) 
 
 
@@ -193,6 +193,7 @@ class GameStatusWatcherActions:
                 self.__error_count = 0
 
         if self.__error_count > 6:
+            logging.error("Error on server supected, waiting setted time to try again.")
             time.sleep(self.__config['TIMEOUT'].getint('server_error'))
             self.__error_count = 0
 
@@ -200,6 +201,7 @@ class GameStatusWatcherActions:
         
 
     def __restart_game(self):
+        logging.warning('Restarting automation')
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
 #endregion

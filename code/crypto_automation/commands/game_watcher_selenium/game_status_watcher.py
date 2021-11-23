@@ -148,7 +148,7 @@ class GameStatusWatcherSelenium:
 
 
     def __restart_driver(self):
-        logging.warning('Restarting automation:')
+        logging.warning('Restarting automation.')
         self.webdriver.quit()
         self.webdriver = self.__selenium_helper.setup_driver()
         self.wallet_helper.configure_wallet()

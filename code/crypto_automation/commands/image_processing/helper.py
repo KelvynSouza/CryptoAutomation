@@ -95,7 +95,7 @@ class ImageHelper:
             result = self.__find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
-            raise Exception("Element not found on screen!")
+            raise Exception(f"Element {template_path} not found on screen!")
 
         return result
 
@@ -112,7 +112,7 @@ class ImageHelper:
             result = self.__find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
-            raise Exception("Element not found on screen!")
+            raise Exception(f"Element {template_path} not found on screen!")
 
         return result
 

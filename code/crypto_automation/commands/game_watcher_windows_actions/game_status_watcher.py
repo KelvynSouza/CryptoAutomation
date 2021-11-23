@@ -189,6 +189,8 @@ class GameStatusWatcherActions:
             time_difference_minutes = time_difference.total_seconds() / 60            
             if time_difference_minutes < 5:
                 self.__error_count +=1
+            else:
+                self.__error_count = 0
 
         if self.__error_count > 6:
             time.sleep(self.__config['TIMEOUT'].getint('server_error'))

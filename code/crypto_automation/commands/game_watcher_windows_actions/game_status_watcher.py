@@ -106,7 +106,7 @@ class GameStatusWatcherActions:
             self.__check_possible_server_error()
             self.__restart_game()
         else:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.02, should_grayscale = False)
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale = False)
 
 
     def __verify_and_handle_newmap(self):

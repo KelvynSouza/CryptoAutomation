@@ -97,7 +97,7 @@ class GameStatusWatcherActions:
         
 
     def __validate_game_connection(self):
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.02)
         time.sleep(5)
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2 , 0.05)
         if error:

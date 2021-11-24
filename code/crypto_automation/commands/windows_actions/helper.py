@@ -67,13 +67,14 @@ class WindowsActionsHelper:
     def open_and_maximise_front_window(self, program_path, image_validation_path, *arguments):   
         args = [program_path]
         args.extend(arguments)
-        subprocess.Popen(args)  
+        startupinf = subprocess.STARTUPINFO()
+        # {"hide":0, "normal":1, "minimized":2,"maximized":3,"hidden":0,"minimize":2,"maximize":3}
+        startupinf.wShowWindow = 3 
+        subprocess.Popen(args, startupinfo=startupinf)  
         self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
                                                 [], image_validation_path, 
                                                     self.__config['TIMEOUT'].getint('imagematching'), 
-                                                    0.05, True)
-        hwnd = win32gui.GetForegroundWindow()
-        win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
+                                                    0.05, True)       
 
 
     def process_exists(self, process_name): 

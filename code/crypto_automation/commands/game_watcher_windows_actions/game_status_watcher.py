@@ -97,7 +97,7 @@ class GameStatusWatcherActions:
         
 
     def __validate_game_connection(self):
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.02)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale = False)
         time.sleep(5)
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2 , 0.01, should_grayscale=False)
         if error:
@@ -106,7 +106,7 @@ class GameStatusWatcherActions:
             self.__check_possible_server_error()
             self.__restart_game()
         else:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.02)
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.02, should_grayscale = False)
 
 
     def __verify_and_handle_newmap(self):
@@ -158,8 +158,8 @@ class GameStatusWatcherActions:
 
 #region Util
     
-    def __find_and_click_by_template(self, template_path, confidence_level = 0.05, should_thrown = True):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
+    def __find_and_click_by_template(self, template_path, confidence_level = 0.05, should_thrown = True, should_grayscale = True):
+        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
 
         if result_match:
             self.__windows_action_helper.click_on(result_match.x, result_match.y)

@@ -95,7 +95,7 @@ class ImageHelper:
             result = self.__find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
-            raise Exception("Element not found on screen!")
+            raise Exception(f"Element {template_path} not found on screen!")
 
         return result
 
@@ -112,7 +112,7 @@ class ImageHelper:
             result = self.__find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
-            raise Exception("Element not found on screen!")
+            raise Exception(f"Element {template_path} not found on screen!")
 
         return result
 
@@ -129,3 +129,11 @@ class ImageHelper:
 
         plt.show()
     
+
+    def rescale_frame(self, frame, percent=30, convert_grayscale=False):
+        width = int(frame.shape[1] * percent/ 100)
+        height = int(frame.shape[0] * percent/ 100)
+        dim = (width, height)
+        if convert_grayscale:
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        return cv2.resize(frame, dim, interpolation = cv2.INTER_LANCZOS4)

@@ -99,14 +99,14 @@ class GameStatusWatcherActions:
     def __validate_game_connection(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.02)
         time.sleep(5)
-        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2 , 0.05)
+        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2 , 0.01, should_grayscale=False)
         if error:
             logging.error('Error on game connection, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
             self.__check_possible_server_error()
             self.__restart_game()
         else:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.02)
 
 
     def __verify_and_handle_newmap(self):

@@ -52,9 +52,9 @@ class WindowsActionsHelper:
         return image_np[:, :, ::-1].copy()  
         
 
-    def save_screenshot_log(self):
+    def save_screenshot_log(self, grayscale = True):
         image = self.take_screenshot()
-        image = self.__image_helper.rescale_frame(image)         
+        image = self.__image_helper.rescale_frame(image, 50 ,convert_grayscale=grayscale)         
         date_time = datetime.now().strftime("%Y-%m-%d %H_%M_%S")
         screenshot_path = os.path.join( self.__config['COMMON']['screenshots_path'], date_time+'.png')
         cv2.imwrite(screenshot_path, image)
@@ -67,13 +67,14 @@ class WindowsActionsHelper:
     def open_and_maximise_front_window(self, program_path, image_validation_path, *arguments):   
         args = [program_path]
         args.extend(arguments)
-        subprocess.Popen(args)  
+        startupinf = subprocess.STARTUPINFO()
+        # {"hide":0, "normal":1, "minimized":2,"maximized":3,"hidden":0,"minimize":2,"maximize":3}
+        startupinf.wShowWindow = 3 
+        subprocess.Popen(args, startupinfo=startupinf)  
         self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
                                                 [], image_validation_path, 
                                                     self.__config['TIMEOUT'].getint('imagematching'), 
-                                                    0.05, True)
-        hwnd = win32gui.GetForegroundWindow()
-        win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
+                                                    0.05, True)       
 
 
     def process_exists(self, process_name): 

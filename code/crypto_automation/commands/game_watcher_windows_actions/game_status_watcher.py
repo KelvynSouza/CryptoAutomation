@@ -30,7 +30,7 @@ class GameStatusWatcherActions:
             self.__check_possible_server_error()
         
         error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
-        error_handling = Thread(self.__thread_safe, self.__validate_game_connection, self.__config['RETRY'].getint('verify_zero_coins'))
+        connection_error_handling = Thread(self.__thread_safe, self.__validate_game_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
 
@@ -105,6 +105,9 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.save_screenshot_log()
             self.__check_possible_server_error()
             self.__restart_game()
+        else:
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
 
 
     def __verify_and_handle_newmap(self):

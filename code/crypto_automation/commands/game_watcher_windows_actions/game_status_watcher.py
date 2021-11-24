@@ -184,10 +184,7 @@ class GameStatusWatcherActions:
         error = False                
         while True:            
             with self.lock:                
-                try:    
-                    if error:
-                        self.__restart_game()
-                        error = False                
+                try:               
                     if positional_arguments:
                         method(*positional_arguments)
                     elif keyword_arguments:
@@ -200,7 +197,14 @@ class GameStatusWatcherActions:
                     logging.error('Error:' + traceback.format_exc())
                     self.__windows_action_helper.save_screenshot_log()
                     self.__check_possible_server_error() 
-                    error = True
+                    error = True     
+                finally:           
+                    try:
+                        if error:
+                            self.__restart_game()
+                            error = False 
+                    except:
+                        pass
             time.sleep(retrytime) 
 
 

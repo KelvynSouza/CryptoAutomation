@@ -106,7 +106,6 @@ class GameStatusWatcherActions:
             self.__check_possible_server_error()
             self.__restart_game()
         else:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'])
             self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
 
 

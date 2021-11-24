@@ -54,7 +54,7 @@ class WindowsActionsHelper:
 
     def save_screenshot_log(self, grayscale = True):
         image = self.take_screenshot()
-        image = self.__image_helper.rescale_frame(image, grayscale)         
+        image = self.__image_helper.rescale_frame(image, convert_grayscale=grayscale)         
         date_time = datetime.now().strftime("%Y-%m-%d %H_%M_%S")
         screenshot_path = os.path.join( self.__config['COMMON']['screenshots_path'], date_time+'.png')
         cv2.imwrite(screenshot_path, image)

@@ -130,8 +130,10 @@ class ImageHelper:
         plt.show()
     
 
-    def rescale_frame(self, frame, percent=30):
+    def rescale_frame(self, frame, percent=30, convert_grayscale=False):
         width = int(frame.shape[1] * percent/ 100)
         height = int(frame.shape[0] * percent/ 100)
         dim = (width, height)
-        return cv2.resize(frame, dim, interpolation =cv2.INTER_LANCZOS4)
+        if convert_grayscale:
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        return cv2.resize(frame, dim, interpolation = cv2.INTER_AREA)

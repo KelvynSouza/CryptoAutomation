@@ -30,6 +30,7 @@ class GameStatusWatcherActions:
             self.__check_possible_server_error()
         
         error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error, self.__config['RETRY'].getint('verify_error'))
+        error_handling = Thread(self.__thread_safe, self.__validate_game_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap, self.__config['RETRY'].getint('verify_newmap'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status, self.__config['RETRY'].getint('verify_heroes_status'))
 
@@ -91,6 +92,18 @@ class GameStatusWatcherActions:
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
             logging.error('game on wrong page, refreshing page.')
+            self.__windows_action_helper.save_screenshot_log()
+            self.__restart_game()
+        
+
+    def __validate_game_connection(self):
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'])
+        time.sleep(5)
+        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2 , 0.05)
+        if error:
+            logging.error('Error on game connection, refreshing page.')
+            self.__windows_action_helper.save_screenshot_log()
+            self.__check_possible_server_error()
             self.__restart_game()
 
 
@@ -107,9 +120,10 @@ class GameStatusWatcherActions:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
             
             timeout = self.__config['TIMEOUT'].getint('imagematching')
-    
+
             if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.02) 
             or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.02)):
+                self.__windows_action_helper.save_screenshot_log()
                 self.__click_all_work_buttons()
     
             self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])

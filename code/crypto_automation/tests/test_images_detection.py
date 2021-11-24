@@ -35,7 +35,7 @@ list_hero = take_screenshot()
 
 #list_hero = cv2.cvtColor(list_hero, cv2.COLOR_RGB2GRAY)
 
-points = image_helper.wait_all_until_match_is_found(take_screenshot, [], template_path, 2, 0.02, should_grayscale=True)
+points = image_helper.wait_all_until_match_is_found(take_screenshot, [], template_path, 2, 0.04, should_grayscale=True)
 
 for x, y in points:
     cv2.circle(list_hero, (x, y), 5, (255,0,0), 3)

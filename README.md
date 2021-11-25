@@ -1,9 +1,9 @@
 # CryptoOcrAutomation
 Para iniciar com sucesso deve
-ter o windows em portugues,
-recomendado mas pode ser maior: Python 3.9.4,
-Resolução do monitor ser de 1600-900 até 1920-1080
-apos clonar, entre na pasta *code* e realize os comandos no cmd:
+-ter o windows em portugues,
+-recomendado mas pode ser: Python 3.9.4,
+-Resolução do monitor ser de 1600-900 até 1920-1080
+-apos clonar, entre na pasta *code* e realize os comandos no cmd:
 - criar ambiente python: python -m venv venv
 - ativar o ambiente: .\\venv\\Scripts\\activate
 - instalar projeto como pacote: pip install -e .

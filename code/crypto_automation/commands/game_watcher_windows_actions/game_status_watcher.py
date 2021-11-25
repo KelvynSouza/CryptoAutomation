@@ -87,13 +87,13 @@ class GameStatusWatcherActions:
             logging.error('Error on game, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
             self.__check_possible_server_error()
-            self.__restart_game()
+            self.__reload_page()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
             logging.error('game on wrong page, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
-            self.__restart_game()
+            self.__reload_page()
         
 
     def __validate_game_connection(self):
@@ -104,7 +104,7 @@ class GameStatusWatcherActions:
         if error:
             logging.error('Error on game connection, refreshing page.')            
             self.__check_possible_server_error()
-            self.__restart_game()
+            self.__reload_page()
         else:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale = False)
 

@@ -27,19 +27,26 @@ def take_screenshot():
 
 image_helper = ImageHelper()
 
-#image = "../resources/images/test/new_map.png"
-template_path = "../resources/images/game/zero_coins_validator.png"
+image_path = "../resources/images/test/heroes_list.png"
+template_path = "../resources/images/game/work_button.png"
 
-list_hero = take_screenshot()
-#template = cv2.imread(template) 
+image = cv2.imread(image_path) 
+template = cv2.imread(template_path) 
+
+imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+ret, thresh = cv2.threshold(imgray, 200, 255, 0)
+contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(thresh, contours, -1, (0,255,0), 3)
+
+show_info(thresh, True)
 
 #list_hero = cv2.cvtColor(list_hero, cv2.COLOR_RGB2GRAY)
 
-points = image_helper.wait_all_until_match_is_found(take_screenshot, [], template_path, 2, 0.001, should_grayscale=False)
+points = image_helper.find_exact_matches_position(image, template, False, 0.05)
 
 for x, y in points:
-    cv2.circle(list_hero, (x, y), 5, (255,0,0), 3)
+    cv2.circle(image, (x, y), 5, (255,0,0), 3)
     
-show_info(list_hero)
+show_info(image)
 print('Final')
 

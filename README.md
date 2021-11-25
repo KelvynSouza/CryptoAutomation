@@ -22,7 +22,7 @@ informações sobre a automação:
 in settings.ini there is a place named "automation_type", there  is 2 options:
 - Type 1 = automation with selenium (higher probability of being found, less errors), 
 - Type 2 = automation using image detection and mouse, keyboard simulation(harder to be found, more prone to error)
-when using type 2 automation, there are some requirements:
+- when using type 2 automation, there are some requirements:
 - your computer must be configured to not disable your video after a time, this can be done in energy options,
 - have your wallet already configured, using portuguese language, 
 - metamask extension icon fixed in you chrome bar and enabled to work with anonymous tab,

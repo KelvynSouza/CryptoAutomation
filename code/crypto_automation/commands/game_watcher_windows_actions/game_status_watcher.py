@@ -64,10 +64,10 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
         
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
-                                        keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02)
+                                        keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
 

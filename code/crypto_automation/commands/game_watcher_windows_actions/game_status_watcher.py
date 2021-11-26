@@ -71,7 +71,7 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)        
 
-        time.sleep(3)
+        time.sleep(5)
 
         self.__reload_page()
 

@@ -89,7 +89,7 @@ class GameStatusWatcherActions:
                                                     0.05, True)
 
 
-    def __verify_and_handle_game_error(self):
+    def __verify_and_handle_game_error(self):        
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2 , 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
@@ -105,6 +105,7 @@ class GameStatusWatcherActions:
         
 
     def __validate_game_connection(self):
+        logging.error('Checking game connection.')
         self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale = False)
         time.sleep(5)
         self.__windows_action_helper.save_screenshot_log()
@@ -133,7 +134,7 @@ class GameStatusWatcherActions:
             timeout = self.__config['TIMEOUT'].getint('imagematching')
 
             if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.02) 
-            or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.02)):
+            or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.05, should_grayscale=False)):
                 self.__windows_action_helper.save_screenshot_log()
                 self.__click_all_work_buttons()
     
@@ -213,8 +214,7 @@ class GameStatusWatcherActions:
                             self.__restart_game()
                             error = False 
                     except:
-                        self.__restart_game()
-                        error = False 
+                        pass
             time.sleep(retrytime) 
 
 
@@ -228,7 +228,7 @@ class GameStatusWatcherActions:
                 self.__error_count = 0
 
         if self.__error_count > 6:
-            logging.error("Error on server supected, waiting setted time to try again.")
+            logging.error(f"Error on server suspected, waiting {self.__config['TIMEOUT'].getint('server_error')} seconds to try again.")
             time.sleep(self.__config['TIMEOUT'].getint('server_error'))
             self.__error_count = 0
 

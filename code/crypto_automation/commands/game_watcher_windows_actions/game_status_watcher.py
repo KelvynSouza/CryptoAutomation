@@ -59,17 +59,17 @@ class GameStatusWatcherActions:
                                                          self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
     
-    def __enter_game(self):
+    def __enter_game(self, reload=False):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
+        if reload == False:
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
-        
-        self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
-                                        keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
+            self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
+                                            keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
@@ -236,5 +236,5 @@ class GameStatusWatcherActions:
     def __reload_page(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
         self.__security_check()
-        self.__enter_game()
+        self.__enter_game(True)
 #endregion

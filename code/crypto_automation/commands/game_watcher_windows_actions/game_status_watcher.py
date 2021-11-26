@@ -59,7 +59,7 @@ class GameStatusWatcherActions:
                                                          self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
     
-    def __enter_game(self, reload=False):
+    def __enter_game(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
@@ -69,9 +69,7 @@ class GameStatusWatcherActions:
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
                                         keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)        
 
         time.sleep(3)
 

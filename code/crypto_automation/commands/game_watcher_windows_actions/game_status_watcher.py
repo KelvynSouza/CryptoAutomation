@@ -63,13 +63,21 @@ class GameStatusWatcherActions:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
         
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
+
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
                                         keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)        
+
+        time.sleep(5)
+
+        self.__reload_page()
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
@@ -135,15 +143,16 @@ class GameStatusWatcherActions:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.02)
+        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
             result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
             if result_active_match:
+                x_offset = -50
                 last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
-                self.__windows_action_helper.click_and_scroll_down(last_active_button_x, last_active_button_y)
-                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.02)
+                self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
+                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
 
         count = 0
@@ -153,7 +162,7 @@ class GameStatusWatcherActions:
                 time.sleep(random_waitable_number(self.__config))            
             last_button_x, last_button_y = result_match[len(result_match)-1]            
             self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.02)
+            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count +=1
 
 
@@ -204,7 +213,8 @@ class GameStatusWatcherActions:
                             self.__restart_game()
                             error = False 
                     except:
-                        pass
+                        self.__restart_game()
+                        error = False 
             time.sleep(retrytime) 
 
 
@@ -229,4 +239,8 @@ class GameStatusWatcherActions:
         logging.warning('Restarting automation')
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
+
+
+    def __reload_page(self):
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
 #endregion

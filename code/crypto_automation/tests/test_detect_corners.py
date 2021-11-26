@@ -23,13 +23,33 @@ def take_screenshot():
     image_np = np.array(pyautogui.screenshot())
     return image_np[:, :, ::-1].copy() 
 
-def getting_rectangle_countours(image_treated, h_min, h_max, w_min):
+def getting_rectangle_countours(image_treated, h_min = None, h_max = None, w_min = None, w_max = None):
     contours, _ = cv2.findContours(image_treated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    if h_min:
+        h_min_fuction = lambda h: h > h_min
+    else:
+        h_min_fuction = lambda h: True
+
+    if h_max:
+        h_max_fuction = lambda h: h < h_max
+    else:
+        h_max_fuction = lambda h: True
+
+    if w_min:
+        w_min_fuction = lambda w: w > w_min
+    else:
+        w_min_fuction = lambda w: True
+
+    if w_max:
+        w_max_fuction = lambda w: w < w_max
+    else:
+        w_max_fuction = lambda w: True
+    
     valid_contours = list()
     for contour in contours:
         (x,y,w,h) = cv2.boundingRect(contour)
-        if(w > w_min and (h > h_min and h < h_max)):
+        if (w_min_fuction(w) and w_max_fuction(w)) and (h_min_fuction(h) and h_max_fuction(h)):
             valid_contours.append((x,y,w,h))
     
     return valid_contours
@@ -78,13 +98,16 @@ if(heroes_cropped):
         hero_stamina = hero_to_check[y:y+h, x:x+w]
         show_info(hero_stamina, True)
 
-        # Threshold of green in HSV space
+        # Threshold of green 
         lower_green = np.array([57,157,120])
-        upper_green = np.array([190, 226, 177])
-    
-        # preparing the mask to overlay
+        upper_green = np.array([190, 226, 181])
+
+        # Detection in binary
         mask = cv2.inRange(hero_stamina, lower_green, upper_green)
         show_info(mask)
-   
+
+        result = getting_rectangle_countours(mask, 1, 20, 70, 100)
+
+        
         print()
 

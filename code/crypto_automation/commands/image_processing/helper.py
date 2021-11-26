@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class ImageHelper:
-    def __find_exact_match_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
+    def find_exact_match_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
         if should_grayscale:
@@ -43,7 +43,7 @@ class ImageHelper:
             return None
 
 
-    def __find_exact_matches_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
+    def find_exact_matches_position(self, image, template, should_grayscale = True, confidence_level = 0.1):
         method = cv2.TM_SQDIFF_NORMED
 
         if should_grayscale:
@@ -92,7 +92,7 @@ class ImageHelper:
             time.sleep(1)
             duration += 1
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
-            result = self.__find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
+            result = self.find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")
@@ -109,7 +109,7 @@ class ImageHelper:
             time.sleep(1)
             duration += 1
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
-            result = self.__find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
+            result = self.find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
 
         if result == None and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")

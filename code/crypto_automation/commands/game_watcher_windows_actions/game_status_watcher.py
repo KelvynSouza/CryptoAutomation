@@ -135,15 +135,16 @@ class GameStatusWatcherActions:
 
 
     def __click_all_work_buttons(self):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.02)
+        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
             result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
             if result_active_match:
+                x_offset = -50
                 last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
-                self.__windows_action_helper.click_and_scroll_down(last_active_button_x, last_active_button_y)
-                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.02)
+                self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
+                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
 
         count = 0
@@ -153,7 +154,7 @@ class GameStatusWatcherActions:
                 time.sleep(random_waitable_number(self.__config))            
             last_button_x, last_button_y = result_match[len(result_match)-1]            
             self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.02)
+            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count +=1
 
 

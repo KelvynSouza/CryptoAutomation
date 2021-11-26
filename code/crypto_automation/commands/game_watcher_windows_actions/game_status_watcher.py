@@ -63,13 +63,23 @@ class GameStatusWatcherActions:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
-        if reload == False:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
+        
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
 
-            self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
-                                            keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
+        self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'], 
+                                        keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+
+        time.sleep(3)
+
+        self.__reload_page()
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
@@ -87,13 +97,13 @@ class GameStatusWatcherActions:
             logging.error('Error on game, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
             self.__check_possible_server_error()
-            self.__reload_page()
+            self.__restart_game()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2 , 0.05)
         if expected_screen == None:
             logging.error('game on wrong page, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
-            self.__reload_page()
+            self.__restart_game()
         
 
     def __validate_game_connection(self):
@@ -104,7 +114,7 @@ class GameStatusWatcherActions:
         if error:
             logging.error('Error on game connection, refreshing page.')            
             self.__check_possible_server_error()
-            self.__reload_page()
+            self.__restart_game()
         else:
             self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale = False)
 
@@ -202,7 +212,7 @@ class GameStatusWatcherActions:
                 finally:           
                     try:
                         if error:
-                            self.__reload_page()
+                            self.__restart_game()
                             error = False 
                     except:
                         self.__restart_game()
@@ -222,7 +232,6 @@ class GameStatusWatcherActions:
         if self.__error_count > 6:
             logging.error("Error on server supected, waiting setted time to try again.")
             time.sleep(self.__config['TIMEOUT'].getint('server_error'))
-            self.__restart_game()
             self.__error_count = 0
 
         self.__error_time = datetime.datetime.now()
@@ -236,6 +245,4 @@ class GameStatusWatcherActions:
 
     def __reload_page(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
-        self.__security_check()
-        self.__enter_game(True)
 #endregion

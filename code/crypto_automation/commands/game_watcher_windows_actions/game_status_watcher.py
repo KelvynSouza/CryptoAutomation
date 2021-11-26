@@ -215,7 +215,7 @@ class GameStatusWatcherActions:
                             error = False 
                     except:
                         pass
-            time.sleep(retrytime) 
+            time.sleep(retrytime*random_number_between(1.0,1.5)) 
 
 
     def __check_possible_server_error(self):

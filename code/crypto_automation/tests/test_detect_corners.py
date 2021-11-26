@@ -85,20 +85,6 @@ if(heroes_cropped):
         # preparing the mask to overlay
         mask = cv2.inRange(hero_stamina, lower_green, upper_green)
         show_info(mask)
-
-
-        '''
-        #Use of threshold
-        hero_stamina_gray = cv2.cvtColor(hero_stamina, cv2.COLOR_BGR2GRAY)   
-        show_info(hero_stamina_gray)     
-
-        ret, thresh_hero_stamina = cv2.threshold(hero_stamina_gray, 170, 255,  cv2.THRESH_OTSU)
-        show_info(thresh_hero_stamina)
-
-        ret, thresh_hero_stamina_add = cv2.threshold(hero_stamina_gray, 170, 255, cv2.THRESH_BINARY_INV)
-        show_info(thresh_hero_stamina_add)
-
-        show_info(thresh_hero_stamina+thresh_hero_stamina_add)
-        '''
+   
         print()
 

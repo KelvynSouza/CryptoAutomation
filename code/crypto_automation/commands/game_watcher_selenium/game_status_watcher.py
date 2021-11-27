@@ -100,10 +100,17 @@ class GameStatusWatcherSelenium:
         inactive_work_button_list = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [
                                                                                       self.webdriver], self.__config['TEMPLATES']['work_button'], 2, 0.02, False, False)
 
+        logging.info('inactive_work_button_list count:' +
+                     len(inactive_work_button_list))
+
         count = 0
         while len(inactive_work_button_list) == 0 and count <= 5:
             active_work_button_list = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [
                                                                                         self.webdriver], self.__config['TEMPLATES']['work_active_button'], 25, 0.02, False, False)
+            logging.info('First while inactive_work_button_list count:' +
+                         len(inactive_work_button_list))
+            logging.info('First while active_work_button_list count:' +
+                         len(active_work_button_list))
             if active_work_button_list:
                 last_active_button_x, last_active_button_y = active_work_button_list[len(
                     active_work_button_list)-1]
@@ -115,6 +122,8 @@ class GameStatusWatcherSelenium:
 
         count = 0
         while len(inactive_work_button_list) > 0 and count <= 5:
+            logging.info('Second while inactive_work_button_list count BEFORE clicking:' +
+                         len(inactive_work_button_list))
             for (x, y) in inactive_work_button_list:
                 self.__selenium_helper.click_element_by_position(
                     self.webdriver, x, y)
@@ -125,11 +134,14 @@ class GameStatusWatcherSelenium:
                 last_button_x, last_button_y)
             inactive_work_button_list = self.__image_helper.wait_all_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [
                                                                                           self.webdriver], self.__config['TEMPLATES']['work_button'], 25, 0.02, False, False)
+            logging.info('Second while inactive_work_button_list count AFTER clicking:' +
+                         len(inactive_work_button_list))
 
             count += 1
 
 
 # region Util
+
 
     def __find_and_click_by_template(self, template_path, confidence_level=0.1):
         result_match = self.__image_helper.wait_until_match_is_found(self.__selenium_helper.selenium_screenshot_to_opencv, [

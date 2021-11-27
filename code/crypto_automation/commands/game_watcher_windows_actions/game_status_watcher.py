@@ -148,7 +148,7 @@ class GameStatusWatcherActions:
 
         count = 0
         while len(result_match) == 0 and count <= 5:
-            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.02)
+            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.02, should_grayscale=False)
             if result_active_match:
                 x_offset = -50
                 last_active_button_x, last_active_button_y  = result_active_match[len(result_active_match)-1]
@@ -158,12 +158,14 @@ class GameStatusWatcherActions:
 
         count = 0
         while len(result_match) > 0 and count <= 5:                    
+            logging.info('result_match count BEFORE clicking: ' + len(result_match))
             for (x, y) in result_match:
                 self.__windows_action_helper.click_on(x, y)
                 time.sleep(random_waitable_number(self.__config))            
             last_button_x, last_button_y = result_match[len(result_match)-1]            
             self.__windows_action_helper.click_and_scroll_down(last_button_x, last_button_y)
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
+            logging.info('result_match count AFTER clicking: ' + len(result_match))
             count +=1
 
 

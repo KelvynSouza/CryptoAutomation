@@ -150,8 +150,8 @@ class GameStatusWatcherActions:
 
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.001, should_grayscale=False)
-           or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.001, should_grayscale=False)):
+        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
+           or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
             self.__windows_action_helper.save_screenshot_log()
             self.__click_all_work_buttons()
 
@@ -164,12 +164,12 @@ class GameStatusWatcherActions:
 
     def __click_all_work_buttons(self):
         result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['work_button'], 2, 0.001, should_grayscale=False)
+        ], self.__config['TEMPLATES']['work_button'], 2, 0.005, should_grayscale=False)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
             result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-            ], self.__config['TEMPLATES']['work_active_button'], 25, 0.001, should_grayscale=False)
+            ], self.__config['TEMPLATES']['work_active_button'], 25, 0.005, should_grayscale=False)
             if result_active_match:
                 x_offset = -50
                 last_active_button_x, last_active_button_y = result_active_match[len(
@@ -177,7 +177,7 @@ class GameStatusWatcherActions:
                 self.__windows_action_helper.click_and_scroll_down(
                     last_active_button_x + x_offset, last_active_button_y)
                 result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-                ], self.__config['TEMPLATES']['work_button'], 25, 0.001, should_grayscale=False)
+                ], self.__config['TEMPLATES']['work_button'], 25, 0.005, should_grayscale=False)
             count += 1
 
         count = 0
@@ -191,7 +191,7 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.click_and_scroll_down(
                 last_button_x, last_button_y)
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-            ], self.__config['TEMPLATES']['work_button'], 25, 0.001, should_grayscale=False)
+            ], self.__config['TEMPLATES']['work_button'], 25, 0.005, should_grayscale=False)
             logging.warning(
                 f"result_match count AFTER clicking: {str(len(result_match))}")
             count += 1

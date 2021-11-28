@@ -211,11 +211,13 @@ class GameStatusWatcherActions:
                             self.__restart_game()
                             error = False 
                     except:
-                        pass
+                        self.__check_possible_server_error()
+                        
             time.sleep(retrytime*random_number_between(1.0,1.5)) 
 
 
     def __check_possible_server_error(self):
+        logging.error(f"Checking for possible error on server.")
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)
             time_difference_minutes = time_difference.total_seconds() / 60            

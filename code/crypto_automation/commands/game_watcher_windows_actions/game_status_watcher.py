@@ -182,7 +182,7 @@ class GameStatusWatcherActions:
 
         count = 0
         while len(result_match) > 0 and count <= 5:
-            logging.info(
+            logging.warning(
                 f'result_match count BEFORE clicking: {str(len(result_match))}')
             for (x, y) in result_match:
                 self.__windows_action_helper.click_on(x, y)
@@ -192,7 +192,7 @@ class GameStatusWatcherActions:
                 last_button_x, last_button_y)
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
             ], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
-            logging.info(
+            logging.warning(
                 f"result_match count AFTER clicking: {str(len(result_match))}")
             count += 1
 

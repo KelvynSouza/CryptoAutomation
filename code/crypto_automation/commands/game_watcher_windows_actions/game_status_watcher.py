@@ -236,6 +236,7 @@ class GameStatusWatcherActions:
         logging.warning('Restarting automation')
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
+        logging.warning('Restarted successfully')
 
 
     def __reload_page(self):

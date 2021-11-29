@@ -218,7 +218,7 @@ class GameStatusWatcherActions:
         logging.warning('Restarted successfully')
 
 
-    def __execute_method(method, positional_arguments = None, keyword_arguments = None):
+    def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):
         if positional_arguments:
             method(*positional_arguments)
         elif keyword_arguments:

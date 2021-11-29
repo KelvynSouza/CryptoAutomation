@@ -12,7 +12,6 @@ from crypto_automation.commands.shared.thread_helper import Thread
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
 
-
 class GameStatusWatcherActions:
     def __init__(self, config: ConfigParser):
         self.__config = config
@@ -29,12 +28,10 @@ class GameStatusWatcherActions:
         except BaseException:
             self.__check_possible_server_error()
 
-        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error,
-                                self.__config['RETRY'].getint('verify_error'))
+        status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,
+                                 self.__config['RETRY'].getint('verify_error'))
         connection_error_handling = Thread(
-            self.__thread_safe, self.__validate_game_connection, self.__config['RETRY'].getint('verify_zero_coins'))
-        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap,
-                                 self.__config['RETRY'].getint('verify_newmap'))
+            self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,
                                self.__config['RETRY'].getint('verify_heroes_status'))
 
@@ -100,7 +97,16 @@ class GameStatusWatcherActions:
                                                           'imagematching'),
                                                       0.05, True)
 
-    def __verify_and_handle_game_error(self):
+    def __handle_unexpected_status(self):
+        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
+        ], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
+        if newmap:
+            logging.warning('entering new map')
+            self.__windows_action_helper.save_screenshot_log()
+            self.__find_and_click_by_template(
+                self.__config['TEMPLATES']['newmap_button'])
+            self.__windows_action_helper.save_screenshot_log()
+
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
         ], self.__config['TEMPLATES']['error_message'], 2, 0.05)
         if error:
@@ -116,7 +122,7 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.save_screenshot_log()
             self.__restart_game()
 
-    def __validate_game_connection(self):
+    def __validate_connection(self):
         logging.error('Checking game connection.')
         self.__find_and_click_by_template(
             self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale=False)
@@ -131,16 +137,6 @@ class GameStatusWatcherActions:
         else:
             self.__find_and_click_by_template(
                 self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale=False)
-
-    def __verify_and_handle_newmap(self):
-        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
-
-        if newmap:
-            logging.warning('entering new map')
-            self.__windows_action_helper.save_screenshot_log()
-            self.__find_and_click_by_template(
-                self.__config['TEMPLATES']['newmap_button'])
 
     def __verify_and_handle_heroes_status(self):
         logging.warning('Checking heroes status')
@@ -163,6 +159,7 @@ class GameStatusWatcherActions:
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
         ], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
 
+# region Util
     def __click_all_work_buttons(self):
         result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
         ], self.__config['TEMPLATES']['work_button'], 2, 0.005, should_grayscale=False)
@@ -192,8 +189,6 @@ class GameStatusWatcherActions:
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
             ], self.__config['TEMPLATES']['work_button'], 25, 0.005, should_grayscale=False)
             count += 1
-
-# region Util
 
     def __find_and_click_by_template(self, template_path, confidence_level=0.05, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
@@ -242,10 +237,12 @@ class GameStatusWatcherActions:
                             self.__restart_game()
                             error = False
                     except:
-                        pass
+                        self.__check_possible_server_error()
+
             time.sleep(retrytime*random_number_between(1.0, 1.5))
 
     def __check_possible_server_error(self):
+        logging.error(f"Checking for possible error on server.")
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)
             time_difference_minutes = time_difference.total_seconds() / 60
@@ -267,6 +264,7 @@ class GameStatusWatcherActions:
         self.__windows_action_helper.kill_process(
             self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
+        logging.warning('Restarted successfully')
 
     def __reload_page(self):
         self.__find_and_click_by_template(

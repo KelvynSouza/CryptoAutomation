@@ -239,7 +239,7 @@ class GameStatusWatcherActions:
             else:
                 self.__error_count = 0
 
-        if self.__error_count > 6:
+        if self.__error_count >= 5:
             time_sleep = self.__config['TIMEOUT'].getint('server_error') * random_number_between(1.0,1.5)
             logging.error(f"Error on server suspected, waiting {time_sleep} seconds to try again.")
             time.sleep(time_sleep)

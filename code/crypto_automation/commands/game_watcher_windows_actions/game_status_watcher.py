@@ -212,13 +212,6 @@ class GameStatusWatcherActions:
             time.sleep(retrytime*random_number_between(1.0,1.5)) 
 
 
-    def __restart_game(self):
-        logging.warning('Restarting automation')
-        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
-        self.__open_chrome_and_goto_game()
-        logging.warning('Restarted successfully')
-
-
     def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):
         if positional_arguments:
             method(*positional_arguments)
@@ -228,6 +221,13 @@ class GameStatusWatcherActions:
             method(*positional_arguments, **keyword_arguments)
         else:
             method()
+
+
+    def __restart_game(self):
+        logging.warning('Restarting automation')
+        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
+        self.__open_chrome_and_goto_game()
+        logging.warning('Restarted successfully')
 
 
     def __check_possible_server_error(self):

@@ -61,9 +61,7 @@ def run():
 
         if error < 10:
             run()        
-
-    if error == 0:
-        logging.warning('Automation started.')
+    
     
 
 def secure_passwords():

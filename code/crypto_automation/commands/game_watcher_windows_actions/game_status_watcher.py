@@ -26,6 +26,7 @@ class GameStatusWatcherActions:
     def start_game(self):
         try:
             self.__open_chrome_and_goto_game()
+            logging.warning('Automation started succefully.')
         except BaseException:
             self.__check_possible_server_error()
         

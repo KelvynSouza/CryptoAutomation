@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 
 
-
 def show_info(image, original=False):
     print('-----------------------------------------------------')    
     print('shape:', image.shape, 'and', 'size:', image.size)    
@@ -62,7 +61,7 @@ def draw_rectangles_in_image(image, contours):
 
 image_helper = ImageHelper()
 
-image_path = "../resources/images/test/heroes_list_resting.png"
+image_path = "../resources/images/test/heroes_list.png"
 
 image = cv2.imread(image_path) 
 
@@ -70,6 +69,8 @@ image = cv2.imread(image_path)
 imgray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 ret, thresh = cv2.threshold(imgray, 225, 240, cv2.THRESH_BINARY)
 edg_img = cv2.Canny(thresh, 225, 240)
+show_info(thresh)
+show_info(edg_img)
 
 #find countours, try to find just the externa contours in the hierarchy
 contours = getting_rectangle_countours(edg_img, 50, 200, 400)
@@ -87,22 +88,24 @@ for x,y,w,h in contours:
 if(heroes_cropped):
     for hero, position in heroes_cropped:
         hero_to_check = hero
-
+        show_info(hero_to_check)
         hero_gray = cv2.cvtColor(hero_to_check, cv2.COLOR_BGR2GRAY)
         ret, thresh_hero = cv2.threshold(hero_gray, 100, 120, cv2.THRESH_BINARY)
         edg_img = cv2.Canny(thresh_hero, 225, 255)    
-
+        show_info(thresh_hero)
         contours = getting_rectangle_countours(edg_img, 10, 20, 100)
         
         if contours:
             x,y,w,h = contours[0]
-            hero_stamina = hero_to_check[y:y+h, x:x+w]  
+            hero_stamina = hero_to_check[y:y+h, x:x+w] 
+            show_info(hero_stamina) 
             # Threshold of green 
             lower_green = np.array([57, 157, 120])
             upper_green = np.array([190, 226, 181])
             
             # Detection in binary
             mask = cv2.inRange(hero_stamina, lower_green, upper_green)            
+            show_info(mask) 
 
             if np.max(mask) == 0:
                 # Threshold of red
@@ -113,6 +116,7 @@ if(heroes_cropped):
             _,_,charged_bar_w,_ = getting_rectangle_countours(mask, None, None, None, None)[0] 
 
             cv2.putText(image, f'{charged_bar_w}%', (position[0]+100, position[1]), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            show_info(image)
+            
             print(charged_bar_w)
+    show_info(image)
 

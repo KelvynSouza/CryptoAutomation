@@ -25,6 +25,7 @@ class GameStatusWatcherActions:
     def start_game(self):
         try:
             self.__open_chrome_and_goto_game()
+            logging.warning('Automation started succefully.')
         except BaseException:
             self.__check_possible_server_error()
 
@@ -103,8 +104,10 @@ class GameStatusWatcherActions:
         if newmap:
             logging.warning('entering new map')
             self.__windows_action_helper.save_screenshot_log()
-            self.__find_and_click_by_template(
-                self.__config['TEMPLATES']['newmap_button'])
+
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
+            time.sleep(5)
+
             self.__windows_action_helper.save_screenshot_log()
 
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
@@ -207,25 +210,18 @@ class GameStatusWatcherActions:
                 result_match.x, result_match.y, to_write)
 
     def __security_check(self):
-        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
-                                                      [], self.__config['TEMPLATES']['url_validate'],
-                                                      self.__config['TIMEOUT'].getint(
-                                                          'imagematching'),
-                                                      0.02, True)
+        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
+                                                                [], self.__config['TEMPLATES']['url_validate'], 
+                                                                    self.__config['TIMEOUT'].getint('imagematching') , 
+                                                                    0.02, True)
 
-    def __thread_safe(self, method, retrytime, positional_arguments=None, keyword_arguments=None):
-        error = False
-        while True:
-            with self.lock:
-                try:
-                    if positional_arguments:
-                        method(*positional_arguments)
-                    elif keyword_arguments:
-                        method(**keyword_arguments)
-                    elif positional_arguments and keyword_arguments:
-                        method(*positional_arguments, **keyword_arguments)
-                    else:
-                        method()
+
+    def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
+        error = False                
+        while True:            
+            with self.lock:                
+                try:               
+                    self.__execute_method(method, positional_arguments, keyword_arguments)
                 except BaseException as ex:
                     logging.error('Error:' + traceback.format_exc())
                     self.__windows_action_helper.save_screenshot_log()
@@ -235,11 +231,31 @@ class GameStatusWatcherActions:
                     try:
                         if error:
                             self.__restart_game()
-                            error = False
+                            self.__execute_method(method, positional_arguments, keyword_arguments)
+                            error = False 
+
                     except:
                         self.__check_possible_server_error()
 
             time.sleep(retrytime*random_number_between(1.0, 1.5))
+
+    def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):
+        if positional_arguments:
+            method(*positional_arguments)
+        elif keyword_arguments:
+            method(**keyword_arguments)
+        elif positional_arguments and keyword_arguments: 
+            method(*positional_arguments, **keyword_arguments)
+        else:
+            method()
+
+
+    def __restart_game(self):
+        logging.warning('Restarting automation')
+        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
+        self.__open_chrome_and_goto_game()
+        logging.warning('Restarted successfully')
+
 
     def __check_possible_server_error(self):
         logging.error(f"Checking for possible error on server.")
@@ -251,20 +267,14 @@ class GameStatusWatcherActions:
             else:
                 self.__error_count = 0
 
-        if self.__error_count > 6:
-            logging.error(
-                f"Error on server suspected, waiting {self.__config['TIMEOUT'].getint('server_error')} seconds to try again.")
-            time.sleep(self.__config['TIMEOUT'].getint('server_error'))
+        if self.__error_count >= 5:
+            time_sleep = self.__config['TIMEOUT'].getint('server_error') * random_number_between(1.0,1.5)
+            logging.error(f"Error on server suspected, waiting {time_sleep} seconds to try again.")
+            time.sleep(time_sleep)
             self.__error_count = 0
 
         self.__error_time = datetime.datetime.now()
 
-    def __restart_game(self):
-        logging.warning('Restarting automation')
-        self.__windows_action_helper.kill_process(
-            self.__config['WEBDRIVER']['chrome_exe_name'])
-        self.__open_chrome_and_goto_game()
-        logging.warning('Restarted successfully')
 
     def __reload_page(self):
         self.__find_and_click_by_template(

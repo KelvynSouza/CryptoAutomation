@@ -117,15 +117,17 @@ class ImageHelper:
         return result
 
     
-    def show_image(image, isgray=False):
+    def show_info(self, image, original=False):
         print('-----------------------------------------------------')    
         print('shape:', image.shape, 'and', 'size:', image.size)    
         print(image.dtype)
-
-        if isgray:
-            plt.imshow(image, cmap='gray')        
+        if original:
+            plt.imshow(image)
         else:
-            plt.imshow(image[:,:,::-1])
+            if len(image.shape) < 3:
+                plt.imshow(image, cmap='gray')        
+            else:
+                plt.imshow(image[:,:,::-1])
 
         plt.show()
     

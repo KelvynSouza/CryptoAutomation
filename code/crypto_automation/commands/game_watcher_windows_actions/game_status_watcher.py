@@ -17,8 +17,7 @@ class GameStatusWatcherActions:
         self.__config = config
         self.lock = threading.Lock()
         self.__image_helper = ImageHelper()
-        self.__windows_action_helper = WindowsActionsHelper(
-            config, self.__image_helper)
+        self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
         self.__error_count = 0
         self.__error_time = None
 
@@ -29,12 +28,9 @@ class GameStatusWatcherActions:
         except BaseException:
             self.__check_possible_server_error()
 
-        status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,
-                                 self.__config['RETRY'].getint('verify_error'))
-        connection_error_handling = Thread(
-            self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
-        hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,
-                               self.__config['RETRY'].getint('verify_heroes_status'))
+        status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,self.__config['RETRY'].getint('verify_error'))
+        connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
+        hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
 
     def __open_chrome_and_goto_game(self):
         self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],
@@ -48,11 +44,9 @@ class GameStatusWatcherActions:
         self.__enter_game()
 
     def __open_game_website(self):
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['incognito_icon'], 0.05)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['incognito_icon'], 0.05)
 
-        self.__find_and_write_by_template(
-            self.__config['TEMPLATES']['url_input'], self.__config['COMMON']['bomb_crypto_url'], 0.05)
+        self.__find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['COMMON']['bomb_crypto_url'], 0.05)
 
         self.__windows_action_helper.press_special_buttons("enter")
 
@@ -61,36 +55,28 @@ class GameStatusWatcherActions:
                                                       self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
     def __enter_game(self):
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['connect_wallet_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['metamask_connect_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
 
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02, should_thrown=False)
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
 
         time.sleep(5)
 
         self.__reload_page()
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['connect_wallet_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['metamask_connect_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['metamask_sign_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['MapMode'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                       [], self.__config['TEMPLATES']['map_screen_validator'],
@@ -99,19 +85,19 @@ class GameStatusWatcherActions:
                                                       0.05, True)
 
     def __handle_unexpected_status(self):
-        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
+        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
         if newmap:
             logging.warning('entering new map')
+
             self.__windows_action_helper.save_screenshot_log()
 
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
+
             time.sleep(5)
 
             self.__windows_action_helper.save_screenshot_log()
 
-        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['error_message'], 2, 0.05)
+        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2, 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
             self.__windows_action_helper.save_screenshot_log()
@@ -127,12 +113,14 @@ class GameStatusWatcherActions:
 
     def __validate_connection(self):
         logging.error('Checking game connection.')
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale=False)
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale=False)
+
         time.sleep(5)
+
         self.__windows_action_helper.save_screenshot_log()
-        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['zero_coins_validator'], 2, 0.001, should_grayscale=False)
+
+        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2, 0.001, should_grayscale=False)
         if error:
             logging.error('Error on game connection, refreshing page.')
             self.__check_possible_server_error()
@@ -143,10 +131,10 @@ class GameStatusWatcherActions:
 
     def __verify_and_handle_heroes_status(self):
         logging.warning('Checking heroes status')
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['back_button'])
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['heroes_icon'])
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
 
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
@@ -155,30 +143,22 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.save_screenshot_log()
             self.__click_all_work_buttons()
 
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['exit_button'])
-        self.__find_and_click_by_template(
-            self.__config['TEMPLATES']['MapMode'])
-        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
+        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
 
 # region Util
     def __click_all_work_buttons(self):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], self.__config['TEMPLATES']['work_button'], 2, 0.005, should_grayscale=False)
+        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
 
         count = 0
         while len(result_match) == 0 and count <= 5:
-            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-            ], self.__config['TEMPLATES']['work_active_button'], 25, 0.005, should_grayscale=False)
+            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.002, should_grayscale=False)
             if result_active_match:
                 x_offset = -50
-                last_active_button_x, last_active_button_y = result_active_match[len(
-                    result_active_match)-1]
-                self.__windows_action_helper.click_and_scroll_down(
-                    last_active_button_x + x_offset, last_active_button_y)
-                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-                ], self.__config['TEMPLATES']['work_button'], 25, 0.005, should_grayscale=False)
+                last_active_button_x, last_active_button_y = result_active_match[len(result_active_match)-1]
+                self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
+                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
 
         count = 0
@@ -187,27 +167,21 @@ class GameStatusWatcherActions:
                 self.__windows_action_helper.click_on(x, y)
                 time.sleep(random_waitable_number(self.__config))
             last_button_x, last_button_y = result_match[len(result_match)-1]
-            self.__windows_action_helper.click_and_scroll_down(
-                last_button_x, last_button_y)
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-            ], self.__config['TEMPLATES']['work_button'], 25, 0.005, should_grayscale=False)
+            self.__windows_action_helper.click_and_scroll_down( last_button_x, last_button_y)
+            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
 
     def __find_and_click_by_template(self, template_path, confidence_level=0.05, should_thrown=True, should_grayscale=True):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
+        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
 
         if result_match:
-            self.__windows_action_helper.click_on(
-                result_match.x, result_match.y)
+            self.__windows_action_helper.click_on(result_match.x, result_match.y)
 
     def __find_and_write_by_template(self, template_path, to_write, confidence_level=0.05, should_thrown=True):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [
-        ], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
+        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
 
         if result_match:
-            self.__windows_action_helper.write_at(
-                result_match.x, result_match.y, to_write)
+            self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)
 
     def __security_check(self):
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 

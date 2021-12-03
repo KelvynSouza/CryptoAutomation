@@ -37,6 +37,15 @@ class WindowsActionsHelper:
             win32api.mouse_event(win32con.MOUSEEVENTF_WHEEL, 0, 0, -1, 0)
 
 
+    def click_and_hold(self, x, y):
+        win32api.SetCursorPos((x, y))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y,0,0) 
+
+
+    def release_click(self, x, y):       
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  
+
+
     def __click(self, x, y):
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x, y,0,0)        

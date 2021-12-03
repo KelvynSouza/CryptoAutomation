@@ -131,7 +131,7 @@ class CaptchaSolver:
                 mask_piece = cv2.inRange(gray_piece, lower_gray, upper_gray)
                 result = np.where(mask_piece == 255)
 
-                if result[0].size <= 250 or slide_button.x + offset_x > (x_screen + w_screen) * 0.75:
+                if result[0].size <= self.__config['IMAGEDETECTION'].getint('captcha_piece_release') or slide_button.x + offset_x > (x_screen + w_screen) * 0.75:
                     self.__windows_action_helper.release_click(slide_button.x + offset_x, slide_button.y)
                     loop = False
 

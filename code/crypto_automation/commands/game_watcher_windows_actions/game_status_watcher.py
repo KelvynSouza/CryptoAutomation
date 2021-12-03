@@ -7,6 +7,7 @@ import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
+from crypto_automation.commands.game_watcher_windows_actions.captcha_solver import CaptchaSolver
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Thread
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
@@ -14,12 +15,14 @@ from crypto_automation.commands.shared.numbers_helper import random_waitable_num
 
 class GameStatusWatcherActions:
     def __init__(self, config: ConfigParser):
-        self.__config = config
-        self.lock = threading.Lock()
+        self.__config = config        
         self.__image_helper = ImageHelper()
-        self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
+        self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
+        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
+        self.lock = threading.Lock()
         self.__error_count = 0
         self.__error_time = None
+
 
     def start_game(self):
         try:
@@ -32,6 +35,7 @@ class GameStatusWatcherActions:
         connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
 
+
     def __open_chrome_and_goto_game(self):
         self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],
                                                                     self.__config['TEMPLATES']['incognito_icon'],
@@ -42,6 +46,7 @@ class GameStatusWatcherActions:
         self.__security_check()
 
         self.__enter_game()
+
 
     def __open_game_website(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['incognito_icon'], 0.05)
@@ -54,10 +59,11 @@ class GameStatusWatcherActions:
                                                       [], self.__config['TEMPLATES']['connect_wallet_button'],
                                                       self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
+        self.__captcha_solver.get_game_window()
+
+
     def __enter_game(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_connect_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02, should_thrown=False)
 
@@ -83,6 +89,7 @@ class GameStatusWatcherActions:
                                                       self.__config['TIMEOUT'].getint(
                                                           'imagematching'),
                                                       0.05, True)
+
 
     def __handle_unexpected_status(self):
         newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
@@ -111,6 +118,7 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.save_screenshot_log()
             self.__restart_game()
 
+
     def __validate_connection(self):
         logging.error('Checking game connection.')
 
@@ -129,6 +137,7 @@ class GameStatusWatcherActions:
             self.__find_and_click_by_template(
                 self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale=False)
 
+
     def __verify_and_handle_heroes_status(self):
         logging.warning('Checking heroes status')
 
@@ -146,6 +155,7 @@ class GameStatusWatcherActions:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
+
 
 # region Util
     def __click_all_work_buttons(self):
@@ -171,17 +181,24 @@ class GameStatusWatcherActions:
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
 
+
     def __find_and_click_by_template(self, template_path, confidence_level=0.05, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
 
         if result_match:
             self.__windows_action_helper.click_on(result_match.x, result_match.y)
 
+        captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 2, 0.05, False, False)
+        if captcha_match:
+            self.__captcha_solver.solve_captcha()
+            
+
     def __find_and_write_by_template(self, template_path, to_write, confidence_level=0.05, should_thrown=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown)
 
         if result_match:
             self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)
+
 
     def __security_check(self):
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
@@ -212,6 +229,7 @@ class GameStatusWatcherActions:
                         self.__check_possible_server_error()
 
             time.sleep(retrytime*random_number_between(1.0, 1.5))
+
 
     def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):
         if positional_arguments:

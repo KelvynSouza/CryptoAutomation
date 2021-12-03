@@ -25,12 +25,12 @@ def take_screenshot():
 image_helper = ImageHelper()
 
 image_path = "../resources/images/test/heroes_list_resting.png"
-template_path = "../resources/images/game/work_button.png"
+template_path = "../resources/images/game/robot_message.png"
 
-image = cv2.imread(image_path) 
+image = take_screenshot()
 template = cv2.imread(template_path)
 
-points = image_helper.find_exact_matches_position(image, template, False, 0.005)
+points = image_helper.find_exact_matches_position(image, template, False, 0.05)
 
 for x, y in points:
     cv2.circle(image, (x, y), 5, (255,0,0), 3)

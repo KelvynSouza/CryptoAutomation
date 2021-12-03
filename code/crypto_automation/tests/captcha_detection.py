@@ -1,12 +1,11 @@
 import configparser
 import cv2
 import numpy as np
-import pyautogui
+import time
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.os_helper import create_log_folder
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
-from crypto_automation.tests.test_detect_corners import show_info
 
 
 class TestCaptchaSolver:
@@ -32,8 +31,8 @@ class TestCaptchaSolver:
         plt.show()
 
 
-    def getting_rectangle_countours(self, image_treated, h_min = None, h_max = None, w_min = None, w_max = None):
-        contours, _ = cv2.findContours(image_treated, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    def getting_rectangle_countours(self, image_treated, h_min = None, h_max = None, w_min = None, w_max = None, find_mode = cv2.RETR_CCOMP):
+        contours, _ = cv2.findContours(image_treated, find_mode, cv2.CHAIN_APPROX_SIMPLE)
 
         if h_min:
             h_min_fuction = lambda h: h >= h_min
@@ -68,7 +67,6 @@ class TestCaptchaSolver:
         for x,y,w,h in contours:
             cv2.rectangle(image, (x, y), (x + w, y + h), (225, 255, 0), 2)
         return image
-
     #endregion
 
     def get_game_window(self):
@@ -85,19 +83,32 @@ class TestCaptchaSolver:
 
 
     def get_gray_piece(self, lower_gray, upper_gray):
-        desktop_image = self.__windows_action_helper.take_screenshot()
-        x,y,w,h = self.__game_window_position
-        game_image = desktop_image[y:y+h,x:x+w]
-        #find place to put captcha
-        game_img = cv2.medianBlur(game_image, 5)
-        # Detection in binary
-        mask = cv2.inRange(game_img, lower_gray, upper_gray)        
-        #locale piece
-        contours = self.getting_rectangle_countours(mask, 60, 90, 40, 90) 
-        #store this variable globally so that it can be used again
-        self.draw_rectangles_in_image(mask, contours)
-        self.show_info(mask)
-        self.__gray_piece_position = contours[0]  
+        result = False
+        count = 1
+        while result == False:            
+            desktop_image = self.__windows_action_helper.take_screenshot()
+            x,y,w,h = self.__game_window_position
+            game_image = desktop_image[y:y+h,x:x+w]
+            #find place to put captcha
+            game_img = cv2.medianBlur(game_image, 5)
+            # Detection in binary
+            mask = cv2.inRange(game_img, lower_gray, upper_gray)        
+            #locale piece
+            contours = self.getting_rectangle_countours(mask, 60, 90, 40, 90) 
+            #store this variable globally so that it can be used again
+            self.draw_rectangles_in_image(mask, contours)
+            self.show_info(mask)   
+
+            if contours:   
+                self.__gray_piece_position = contours[0]  
+                result = True
+
+            if count > 10:
+                result = True
+
+            count +=1
+            time.sleep(0.2)
+
 
     def run(self):
         loop = True
@@ -135,12 +146,9 @@ class TestCaptchaSolver:
             mask_piece = cv2.inRange(gray_piece, lower_gray, upper_gray)
             result = np.where(mask_piece == 255)
 
-            if result[0].size <= 250 or slide_button.x + offset_x > (x_screen + w_screen):
+            if result[0].size <= 250 or slide_button.x + offset_x > (x_screen + w_screen) * 0.75:
                 self.__windows_action_helper.release_click(slide_button.x + offset_x, slide_button.y)
                 loop = False
-
-
-
 
 
 config_filename = "D:\dev\CryptoOcrAutomation\code\crypto_automation\settings.ini"

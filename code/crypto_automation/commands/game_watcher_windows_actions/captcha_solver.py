@@ -97,8 +97,6 @@ class CaptchaSolver:
                                                                     [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                         0.05, True, False)
 
-            self.__windows_action_helper.click_and_hold(slide_button.x , slide_button.y)
-
             lower_gray = np.array([110, 110, 110])
             upper_gray = np.array([173, 173, 173])
 
@@ -109,6 +107,8 @@ class CaptchaSolver:
 
             if self.__gray_piece_position == None:
                 raise Exception("Gray piece position not found to solve captcha!")
+
+            self.__windows_action_helper.click_and_hold(slide_button.x , slide_button.y)
 
             offset_x = 0        
             while loop:

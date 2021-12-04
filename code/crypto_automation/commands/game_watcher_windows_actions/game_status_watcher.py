@@ -224,7 +224,6 @@ class GameStatusWatcherActions:
                             self.__restart_game()
                             self.__execute_method(method, positional_arguments, keyword_arguments)
                             error = False 
-
                     except:
                         self.__check_possible_server_error()
 
@@ -252,14 +251,13 @@ class GameStatusWatcherActions:
     def __check_possible_server_error(self):
         logging.error(f"Checking for possible error on server.")
         if self.__error_time:
-            time_difference = (datetime.datetime.now() - self.__error_time)
-            time_difference_minutes = time_difference.total_seconds() / 60
-            if time_difference_minutes <= 3:
+            time_difference = (datetime.datetime.now() - self.__error_time)            
+            if time_difference.total_seconds() <= self.__config['TIMEOUT'].getint('errors_time_difference'):
                 self.__error_count += 1
             else:
                 self.__error_count = 0
 
-        if self.__error_count >= 5:
+        if self.__error_count >= self.__config['TIMEOUT'].getint('errors_count_limit'):
             time_sleep = self.__config['TIMEOUT'].getint('server_error') * random_number_between(1.0,1.5)
             logging.error(f"Error on server suspected, waiting {time_sleep} seconds to try again.")
             time.sleep(time_sleep)

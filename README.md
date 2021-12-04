@@ -17,9 +17,13 @@ Na pasta bat possui um .bat realiza todo o processo de inicialização, para exe
 - Mudar a variavel "set automation_path" com o caminho da automação, pasta onde fica o __main__.py
 
 ## IMPORTANTE:
-in settings.ini there is a place named "automation_type", there  is 2 options:
-- Type 1 => automation with selenium (higher probability of being found, less errors), 
-- Type 2 => automation using image detection and mouse, keyboard simulation(harder to be found, more prone to error)
+On settings.ini, section "COMMON", config "automation_type", there are 2 options:
+- Type 1 => automation with selenium (higher probability of being caught as bot, less errors), 
+- Type 2 => automation using image detection with mouse and keyboard simulation(harder to be caught as bot, more prone to get errors)
+
+When running the automation for the first time, you'll need to configure your MetaMask wallet, follow these steps:
+- On settings.ini, section "SECURITY", config "ispasswordsecured", set it to false.
+- Then in section "LOGIN", config "secretphrase" and "newpassword", type your MetaMask secret phrase and MetaMask password.
 
 #### Type 1:
 Caso ao tentar clicar no "Connect Wallet" o navegador fechar, teste e ajuste a config click_y_offset,

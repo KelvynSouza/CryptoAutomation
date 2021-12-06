@@ -8,21 +8,60 @@ from datetime import datetime
 from win32con import *
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
+from random import randrange
 
 
 class WindowsActionsHelper:
     def __init__(self, config, image_helper: ImageHelper = None):
         self.__config = config
         self.__image_helper = image_helper
+
+    
+    def move_to(self, x, y):
+        pyautogui.moveTo(x, y, random_waitable_number(self.__config), self.__random_tween())
+
+
+    def __random_tween(self):
+        random_number = randrange(1, 30)
+        if random_number == 1: return pyautogui.easeInQuad 
+        if random_number == 2: return pyautogui.easeOutQuad 
+        if random_number == 3: return pyautogui.easeInOutQuad 
+        if random_number == 4: return pyautogui.easeInCubic 
+        if random_number == 5: return pyautogui.easeOutCubic 
+        if random_number == 6: return pyautogui.easeInOutCubic 
+        if random_number == 7: return pyautogui.easeInQuart 
+        if random_number == 8: return pyautogui.easeOutQuart 
+        if random_number == 9: return pyautogui.easeInOutQuart 
+        if random_number == 10: return pyautogui.easeInQuint
+        if random_number == 11: return pyautogui.easeOutQuint
+        if random_number == 12: return pyautogui.easeInOutQuint 
+        if random_number == 13: return pyautogui.easeInSine 
+        if random_number == 14: return pyautogui.easeOutSine 
+        if random_number == 15: return pyautogui.easeInOutSine 
+        if random_number == 16: return pyautogui.easeInExpo
+        if random_number == 17: return pyautogui.easeOutExpo 
+        if random_number == 18: return pyautogui.easeInOutExpo 
+        if random_number == 19: return pyautogui.easeInCirc 
+        if random_number == 20: return pyautogui.easeOutCirc 
+        if random_number == 21: return pyautogui.easeInOutCirc 
+        if random_number == 22: return pyautogui.easeInElastic 
+        if random_number == 23: return pyautogui.easeOutElastic 
+        if random_number == 24: return pyautogui.easeInOutElastic
+        if random_number == 25: return pyautogui.easeInBack 
+        if random_number == 26: return pyautogui.easeOutBack 
+        if random_number == 27: return pyautogui.easeInOutBack 
+        if random_number == 28: return pyautogui.easeInBounce 
+        if random_number == 29: return pyautogui.easeOutBounce 
+        if random_number == 30: return pyautogui.easeInOutBounce
         
 
     def click_on(self, x, y):
-        pyautogui.moveTo(x, y, random_waitable_number(self.__config))
+        self.move_to(x, y)
         self.__click(x,y)
        
 
     def click_and_drag(self, from_x, from_y, height = 0, width=0):
-        pyautogui.moveTo(from_x, from_y, random_waitable_number(self.__config))
+        self.move_to(from_x, from_y)
         pyautogui.drag(height, width, random_waitable_number(self.__config), button='left')
 
 
@@ -38,13 +77,15 @@ class WindowsActionsHelper:
 
 
     def click_and_hold(self, x, y):
-        pyautogui.moveTo(x, y, random_waitable_number(self.__config))
+        self.move_to(x, y)
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y,0,0) 
+
 
     def move_click_hold(self, x, y):
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y,0,0) 
+
 
     def release_click(self, x, y):       
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  

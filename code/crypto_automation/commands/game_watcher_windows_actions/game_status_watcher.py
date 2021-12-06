@@ -225,7 +225,7 @@ class GameStatusWatcherActions:
                     except:
                         self.__check_possible_server_error()
 
-            time.sleep(retrytime*random_number_between(1.0, 1.5))
+            time.sleep(retrytime*random_number_between(1.0, 2))
 
 
     def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):

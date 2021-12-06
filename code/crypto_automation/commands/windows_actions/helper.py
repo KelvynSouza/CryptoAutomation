@@ -15,6 +15,7 @@ class WindowsActionsHelper:
     def __init__(self, config, image_helper: ImageHelper = None):
         self.__config = config
         self.__image_helper = image_helper
+        pyautogui.FAILSAFE = False
 
     
     def move_to(self, x, y):
@@ -58,12 +59,7 @@ class WindowsActionsHelper:
     def click_on(self, x, y):
         self.move_to(x, y)
         self.__click(x,y)
-       
-
-    def click_and_drag(self, from_x, from_y, height = 0, width=0):
-        self.move_to(from_x, from_y)
-        pyautogui.drag(height, width, random_waitable_number(self.__config), button='left')
-
+    
 
     def __click_and_scroll_down_from_package(self, x, y):
         self.click_on(x, y)

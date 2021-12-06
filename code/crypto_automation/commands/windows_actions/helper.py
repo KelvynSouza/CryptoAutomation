@@ -61,7 +61,7 @@ class WindowsActionsHelper:
        
 
     def click_and_drag(self, from_x, from_y, height = 0, width=0):
-        self.move_to(from_x, from_x)
+        self.move_to(from_x, from_y)
         pyautogui.drag(height, width, random_waitable_number(self.__config), button='left')
 
 

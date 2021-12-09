@@ -71,26 +71,53 @@ class TestCaptchaSolver:
     def run(self):
 
         game_image = cv2.imread("../resources/images/test/captcha_new/captcha_2.png") 
-
-        desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY)
-        #self.show_info(desktop_game_gray)
-
-        _, thresh_image = cv2.threshold(desktop_game_gray, 80, 255, cv2.THRESH_BINARY)
-        #self.show_info(thresh_image)
-
-        contours, _ = cv2.findContours(thresh_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-        cv2.drawContours(game_image, contours, -1, (255,0,0), 1)
         self.show_info(game_image)
 
-        edg_img = cv2.Canny(thresh_image, 225, 255)
-        self.show_info(edg_img)        
+        desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY)           
+        
+        
+        _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV)                 
+
+        #Create a structure to aggregate incomplete elements
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+        cv2.dilate(thresh_image,kernel,thresh_image, iterations = 1)
+
+        contours, hierarchy  = cv2.findContours(thresh_image, cv2.RETR_CCOMP , cv2.CHAIN_APPROX_SIMPLE)
+        hierarchy = hierarchy[0] # get the actual inner list of hierarchy descriptions
+        
+        newContours = list()
+        for currentContour, currentHierarchy in zip(contours, hierarchy):            
+            if currentHierarchy[2] < 0:
+                # these are the innermost child components for the outermost,
+                # you should use currentHierarchy[3] < 0
+                newContours.append(currentContour)  
+        
+        #fill numbers to extract captcha
+        cv2.drawContours(game_image, newContours, -1, (82,112,181), thickness=-1)        
+        self.show_info(game_image)
+        mask = cv2.inRange(game_image, (255,255,255), (255,255,255))
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
+        opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        self.show_info(opening)
+
+            
 
         #find place to put captcha
         game_img = cv2.medianBlur(game_image, 5)
 
 
-config_filename = "C:\\Users\\carlo\\Documents\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
+'''
+Código exemplo para pegar area do contorno
+img_contour = img.copy()
+for i in range(len(contours)):
+    area = cv2.contourArea(contours[i])
+    if 100 < area < 10000:
+        cv2.drawContours(img_contour, contours, i, (0, 0, 255), 2)
+'''
+
+
+config_filename = "D:\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
 
 config = configparser.ConfigParser(
     interpolation=configparser.ExtendedInterpolation())

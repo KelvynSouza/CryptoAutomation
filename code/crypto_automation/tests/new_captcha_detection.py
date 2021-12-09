@@ -61,17 +61,20 @@ class TestCaptchaSolver:
 
         return valid_contours
 
-
     def draw_rectangles_in_image(self, image, contours):
         for x,y,w,h in contours:
             cv2.rectangle(image, (x, y), (x + w, y + h), (225, 255, 0), 2)
+        return image
+
+    def draw_rectangles_in_image(self, image, contours):
+        for x,y,w,h in contours:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 0), -1)
         return image
     
 
     def run(self):
 
-        game_image = cv2.imread("../resources/images/test/captcha_new/captcha_2.png") 
-        self.show_info(game_image)
+        game_image = cv2.imread("../resources/images/test/captcha_new/captcha_2.png")         
 
         desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY)           
         
@@ -93,19 +96,34 @@ class TestCaptchaSolver:
                 newContours.append(currentContour)  
         
         #fill numbers to extract captcha
-        cv2.drawContours(game_image, newContours, -1, (82,112,181), thickness=-1)        
-        self.show_info(game_image)
+        cv2.drawContours(game_image, newContours, -1, (82,112,181), thickness=-1) 
         mask = cv2.inRange(game_image, (255,255,255), (255,255,255))
-
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
+        
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(7,5))
         opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+        rect_contours = self.getting_rectangle_countours(opening,0,20,0,20)
+        opening = self.draw_rectangles_in_image(opening, rect_contours) 
         self.show_info(opening)
 
-            
+        numberContours, hierarchy = cv2.findContours(opening, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(game_image, numberContours, -1, (0,0,255), thickness=3) 
 
-        #find place to put captcha
-        game_img = cv2.medianBlur(game_image, 5)
+        # create hull array for convex hull points
 
+        hull_list  = []
+        # calculate points for each contour
+        for i in range(len(numberContours)):
+            # creating convex hull object for each contour
+            hull_list.append(cv2.convexHull(numberContours[i], False))            
+
+        drawing = np.zeros((opening.shape[0], opening.shape[1], 3), dtype=np.uint8)
+        for i in range(len(numberContours)):
+            color = (255, 0,0)
+            cv2.drawContours(drawing, numberContours, i, color)
+            cv2.drawContours(drawing, hull_list, i, color)
+
+        self.show_info(drawing)
 
 '''
 Código exemplo para pegar area do contorno

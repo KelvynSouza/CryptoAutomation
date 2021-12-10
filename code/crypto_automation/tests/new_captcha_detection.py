@@ -106,7 +106,7 @@ class TestCaptchaSolver:
         cv2.drawContours(game_image, newContours, -1, (82,112,181), thickness=-1)
         self.show_info(thresh_image)
         self.show_info(game_image)
-
+        
         #clean the number for better detection with ocr
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
         erosion = cv2.erode(thresh_image, kernel, iterations = 3)

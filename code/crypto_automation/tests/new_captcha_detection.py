@@ -79,17 +79,14 @@ class TestCaptchaSolver:
         self.show_info(game_image, image_name="Original")
 
         #convert image to gray
-        desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY) 
-        self.show_info(desktop_game_gray, image_name="Original Gray")
+        desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY)        
 
         #threshould it for better digits detection
-        _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV)                 
-        self.show_info(thresh_image, image_name="Thresh Image")
+        _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV) 
 
         #Create a structure to aggregate incomplete elements
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
         cv2.dilate(thresh_image,kernel,thresh_image, iterations = 1)
-        self.show_info(thresh_image)
 
         # get the contours and hierarchy so that we can filter only the contours from the digits
         contours, hierarchy  = cv2.findContours(thresh_image, cv2.RETR_CCOMP , cv2.CHAIN_APPROX_SIMPLE)
@@ -105,8 +102,6 @@ class TestCaptchaSolver:
         #fill numbers to extract for better extraction of the captcha 
         cv2.drawContours(thresh_image, newContours, -1, (255,255,255), thickness=-1) 
         cv2.drawContours(game_image, newContours, -1, (82,112,181), thickness=-1)
-        self.show_info(thresh_image)
-        self.show_info(game_image)
         
         #clean the number for better detection with ocr
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
@@ -131,9 +126,7 @@ class TestCaptchaSolver:
         #remove noise from image
         rect_contours = self.getting_rectangle_countours(to_locale_position, 0,20,0,20)
         to_locale_position = self.draw_rectangles_in_image(to_locale_position, rect_contours)         
-        #self.show_info(opening)
-
-        self.show_info(mask, image_name="Mask Image")
+        
         self.show_info(to_validate_number,  image_name="Image to validate number")
         self.show_info(to_locale_position,  image_name="Image to get number position")
 
@@ -162,17 +155,46 @@ class TestCaptchaSolver:
                 if len(temp_contours) > 0:
                     contours = temp_contours
                     break
-                
+        
+        if len(contours) < 3:
+            raise Exception("Error getting numbers position")
+
         #fix border if its near the image's border
         contours = [(contour[0], 20 if contour[1] == 0 else contour[1], contour[2], contour[3]) for contour in contours]
         
-        if len(contours) < 3:
-            print("Error getting numbers position")
+        #Sort contours position to be equals to text position
+        contours.sort(key=lambda tup: tup[0])       
 
         self.show_info(to_locale_position_morph)
         self.draw_rectangles_in_image(game_image, contours,  (255,0,0), 2)
         self.show_info(game_image)
-      
+
+        for i in range(0, len(digits_to_validate)):
+            #prepare template to compare
+            template = cv2.imread(config['TEMPLATES'][digits_to_validate[i]])
+            grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY) 
+            _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY)            
+
+            x,y,w,h = contours[i]
+            resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
+
+            image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template
+            self.show_info(image_to_validate)
+
+            result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.2)
+
+            if result:
+                print(f"Success letter: {digits_to_validate[i]}")
+            else:
+                print(f"Letter '{digits_to_validate[i]}' not found")
+
+
+
+
+
+
+
+
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 custom_config = r'--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'

@@ -16,8 +16,9 @@ class TestCaptchaSolver:
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
 
 
-    def show_info(self, image, original=False):
-        print('-----------------------------------------------------')    
+    def show_info(self, image, original=False, image_name = "Imagem"):
+        print('-----------------------------------------------------')  
+        print(image_name)  
         print('shape:', image.shape, 'and', 'size:', image.size)    
         print(image.dtype)
         if original:
@@ -75,15 +76,15 @@ class TestCaptchaSolver:
 
     def run(self):
         game_image = cv2.imread("../resources/images/test/captcha_new/captcha_6.png")         
-        self.show_info(game_image)
+        self.show_info(game_image, image_name="Original")
 
         #convert image to gray
         desktop_game_gray = cv2.cvtColor(game_image, cv2.COLOR_BGR2GRAY) 
-        self.show_info(desktop_game_gray)
+        self.show_info(desktop_game_gray, image_name="Original Gray")
 
         #threshould it for better digits detection
         _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV)                 
-        self.show_info(thresh_image)
+        self.show_info(thresh_image, image_name="Thresh Image")
 
         #Create a structure to aggregate incomplete elements
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
@@ -116,29 +117,65 @@ class TestCaptchaSolver:
         #get numbers with ocr
         digits_to_validate = pytesseract.image_to_string(erosion, config=custom_config)
         digits_to_validate = digits_to_validate[:3]
+        print(f"OCR value captured: {digits_to_validate}" )
         
-        mask = cv2.inRange(game_image, (250,250,250), (255,255,255))        
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(7,5))
-        opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        #get white number on background
+        mask = cv2.inRange(game_image, (250,250,250), (255,255,255))
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))        
+        to_validate_number = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=2)
+
+        cleaning_kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))    
+        to_locale_position = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cleaning_kernel, iterations=3)
 
         #remove noise from image
-        rect_contours = self.getting_rectangle_countours(opening, 0,20,0,20)
-        opening = self.draw_rectangles_in_image(opening, rect_contours)         
-        self.show_info(opening)
+        rect_contours = self.getting_rectangle_countours(to_locale_position, 0,20,0,20)
+        to_locale_position = self.draw_rectangles_in_image(to_locale_position, rect_contours)         
+        #self.show_info(opening)
+
+        self.show_info(mask, image_name="Mask Image")
+        self.show_info(to_validate_number,  image_name="Image to validate number")
+        self.show_info(to_locale_position,  image_name="Image to get number position")
 
         #Close gaps from corrupted numbers
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(31,45))
-        opening = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-        self.show_info(opening)
+        #One idea is start with low x value for structure and increase until we have only 3 contours 
+        # if it turns into 2 or less, we give up the image and try the take another        
+        aux_y = 0
+        for y in range(55, 80, 2):
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(1, y))
+            to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
+            contours = self.getting_rectangle_countours(to_locale_position_morph, 90, 200, 10, 200)  
 
-        contours = self.getting_rectangle_countours(opening, 50,200,10,200)
+            if len(contours) == 3:
+                aux_y = y
+                break  
+
+        temp_contours = list()
+        for x in range(1, 30, 2):
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(x, aux_y if aux_y > 0 else 60))
+            to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
+            contours = self.getting_rectangle_countours(to_locale_position_morph, 90, 200, 10, 200)  
+
+            if len(contours) == 3:
+                temp_contours = contours                
+            elif len(contours) < 3:
+                if len(temp_contours) > 0:
+                    contours = temp_contours
+                    break
+                
+        #fix border if its near the image's border
+        contours = [(contour[0], 20 if contour[1] == 0 else contour[1], contour[2], contour[3]) for contour in contours]
+        
+        if len(contours) < 3:
+            print("Error getting numbers position")
+
+        self.show_info(to_locale_position_morph)
         self.draw_rectangles_in_image(game_image, contours,  (255,0,0), 2)
-
         self.show_info(game_image)
       
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-custom_config = r'--oem 2 --psm 10 -c tessedit_char_whitelist=0123456789'
+custom_config = r'--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'
 config_filename = "D:\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
 
 config = configparser.ConfigParser(

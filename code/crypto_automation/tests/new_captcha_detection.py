@@ -159,7 +159,7 @@ class TestCaptchaSolver:
                     digits_to_validate.append((number, position))
 
             digits_to_validate.sort(key=lambda tup: tup[1].x)             
-            numbers_to_detect  = [digit[0] for digit in digits_to_validate]
+            numbers_to_detect  = [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
             result_number_detection = numbers_to_detect.copy()
 
             slide_width = self.get_slide_width(captcha_contours)
@@ -181,7 +181,7 @@ class TestCaptchaSolver:
                 elapsed_time = current_time - start_time
 
                 if elapsed_time > seconds:  
-                    result_number_detection = numbers_to_detect
+                    result_number_detection = numbers_to_detect.copy()
                     print(f"Timeout, Captcha number not found") 
                     start_time = time.time()
                     slide_movement += round(slide_width * 0.25)
@@ -250,14 +250,14 @@ class TestCaptchaSolver:
                 #self.show_info(drawn_image)
 
                 l = 0
-                for i in list(result_number_detection):
+                for p, i in list(result_number_detection):
                     #prepare template to compare
                     template = cv2.imread(config['TEMPLATES'][f"complex_{i}"])
 
                     grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                     
                     _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY) 
 
-                    x,y,w,h = contours[l]
+                    x,y,w,h = contours[p]
 
                     resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
                     image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template
@@ -267,7 +267,7 @@ class TestCaptchaSolver:
 
                     if result:
                         print(f"Success number: {i}")
-                        result_number_detection.remove(i)
+                        result_number_detection.remove((p,i))
                         if len(result_number_detection) == 0:
                             success = True                            
                             print("Success all")
@@ -282,7 +282,7 @@ class TestCaptchaSolver:
                     break                    
             
             self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
-            
+
             if success:                
                 break
             

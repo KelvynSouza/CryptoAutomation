@@ -31,10 +31,11 @@ class GameStatusWatcherActions:
         except BaseException:
             self.__check_possible_server_error()
 
+        rumble_mouse = Thread(self.__thread_safe, self.__windows_action_helper.rumble_mouse, self.__config['RETRY'].getint('rumble_mouse'))
         status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,self.__config['RETRY'].getint('verify_error'))
         connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
-        rumble_mouse = Thread(self.__thread_safe, self.__windows_action_helper.rumble_mouse, self.__config['RETRY'].getint('rumble_mouse'))
+        
         
 
     def __open_chrome_and_goto_game(self):
@@ -73,12 +74,14 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
 
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'], should_thrown=False)
+
         #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
-        #time.sleep(5)
+        time.sleep(5)
 
-        #self.__reload_page()
+        self.__reload_page()
 
-        #self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 

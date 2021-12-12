@@ -95,9 +95,9 @@ class WindowsActionsHelper:
 
 
     def rumble_mouse(self):
-        pyautogui.moveRel(25, duration=0.3)
-        pyautogui.moveRel(-50, duration=0.3)
-        pyautogui.moveRel(25, duration=0.3)
+        pyautogui.moveRel(25, 0, duration=0.3)
+        pyautogui.moveRel(-50, 0, duration=0.3)
+        pyautogui.moveRel(25, 0, duration=0.3)
 
 
     def write_at(self, x, y, text):

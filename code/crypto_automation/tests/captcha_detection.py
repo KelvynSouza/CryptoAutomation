@@ -117,7 +117,7 @@ class TestCaptchaSolver:
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                     0.05, False, False)
 
-        #self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+        self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
 
         lower_gray = np.array([110, 110, 110])
         upper_gray = np.array([173, 173, 173])

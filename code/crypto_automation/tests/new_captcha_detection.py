@@ -105,15 +105,34 @@ class TestCaptchaSolver:
             return None        
 
 
-    def run(self):
-        
+    def get_slide_width(self, captcha_contours):
+        captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
 
+        slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
+        mask_slide = cv2.inRange(slide_info, (63,84,132), (65,86,134))        
+        
+        mask_slide_rect = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
+
+
+
+    def run(self):
         slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                     0.05, False, True)
 
-        captcha_x, captcha_y, captcha_w, captcha_h = self.get_captcha_window_contour(self.get_game_window_image())      
+        self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+
+        captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
         
+        slide_width = self.get_slide_width(captcha_contours)
+
+        slide_move_offset = slide_width * 0.25
+
+        self.__windows_action_helper.click_and_hold(slide_button.x + slide_move_offset, slide_button.y)
+        self.__windows_action_helper.click_and_hold(slide_button.x - slide_move_offset, slide_button.y)
+
+        captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
+
         for l in range(4): 
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
@@ -144,7 +163,7 @@ class TestCaptchaSolver:
                     digits_to_validate.append((number, position))
 
             digits_to_validate.sort(key=lambda tup: tup[1].x)
-                        
+
             start_time = time.time()
             seconds = 25 
             #validate phases of captcha

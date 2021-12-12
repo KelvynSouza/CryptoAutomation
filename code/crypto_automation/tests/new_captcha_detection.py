@@ -2,7 +2,6 @@ import configparser
 import cv2
 import numpy as np
 import time
-import pytesseract
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.os_helper import create_log_folder
@@ -15,7 +14,6 @@ class TestCaptchaSolver:
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
         self.get_game_window()
-        self.__custom_tesseract_config =  r'--oem 3 --psm 10 -c tessedit_char_whitelist=0123456789'
 
 
     def show_info(self, image, original=False, image_name = "Imagem"):
@@ -111,29 +109,25 @@ class TestCaptchaSolver:
         slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
         mask_slide = cv2.inRange(slide_info, (63,84,132), (65,86,134))        
         
-        mask_slide_rect = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
-
+        result = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
+        _,_,w,_ = result[0]
+        return w
 
 
     def run(self):
         slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, True)
-
-        self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+                                                                    0.05, False, True)        
 
         captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
-        
-        slide_width = self.get_slide_width(captcha_contours)
-
-        slide_move_offset = slide_width * 0.25
-
-        self.__windows_action_helper.click_and_hold(slide_button.x + slide_move_offset, slide_button.y)
-        self.__windows_action_helper.click_and_hold(slide_button.x - slide_move_offset, slide_button.y)
 
         captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
+        success = False
+        for l in range(4):
+            slide_movement = 0
 
-        for l in range(4): 
+            self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
             desktop_game_gray = cv2.cvtColor(captcha_image, cv2.COLOR_BGR2GRAY) 
@@ -162,18 +156,27 @@ class TestCaptchaSolver:
                 if position:
                     digits_to_validate.append((number, position))
 
-            digits_to_validate.sort(key=lambda tup: tup[1].x)
+            digits_to_validate.sort(key=lambda tup: tup[1].x)             
+
+            slide_movement += round(self.get_slide_width(captcha_contours) * 0.25)
+            self.__windows_action_helper.click_and_hold(slide_button.x + slide_movement, slide_button.y)
+            self.__windows_action_helper.click_and_hold(slide_button.x , slide_button.y)
 
             start_time = time.time()
-            seconds = 25 
+            seconds = 25
+
+            iteration = 0
             #validate phases of captcha
             while True:
                 #check timeout
                 current_time = time.time() 
                 elapsed_time = current_time - start_time
                 if elapsed_time > seconds:  
-                    print(f"Timeout, Captcha number not found")              
-                    break
+                    print(f"Timeout, Captcha number not found") 
+                    start_time = time.time()
+                    self.__windows_action_helper.click_and_hold(slide_button.x + slide_movement, slide_button.y) 
+                    iteration +=1            
+                    
                 
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 
@@ -192,8 +195,8 @@ class TestCaptchaSolver:
                 rect_contours = self.getting_rectangle_countours(to_locale_position, 0,20,0,20)
                 to_locale_position = self.draw_rectangles_in_image(to_locale_position, rect_contours)         
 
-                self.show_info(to_validate_number,  image_name="Image to validate number")
-                self.show_info(to_locale_position,  image_name="Image to get number position")
+                #self.show_info(to_validate_number,  image_name="Image to validate number")
+                #self.show_info(to_locale_position,  image_name="Image to get number position")
 
                 #Close gaps from corrupted numbers
                 #One idea is start with low x value for structure and increase until we have only 3 contours 
@@ -206,7 +209,7 @@ class TestCaptchaSolver:
 
                     if len(contours) == 3:
                         aux_y = y
-                        continue  
+                        break  
 
                 temp_contours = list()
                 for x in range(1, 30, 2):
@@ -219,7 +222,7 @@ class TestCaptchaSolver:
                     elif len(contours) < 3:
                         if len(temp_contours) > 0:
                             contours = temp_contours
-                            continue
+                            break
                         
                 if len(contours) < 3:
                     print("Error getting numbers position")
@@ -231,10 +234,10 @@ class TestCaptchaSolver:
                 #Sort contours position to be equals to text position
                 contours.sort(key=lambda tup: tup[0])       
 
-                self.show_info(to_locale_position_morph)
+                #self.show_info(to_locale_position_morph)
                 drawn_image = np.copy(captcha_image)
                 self.draw_rectangles_in_image(drawn_image, contours,  (255,0,0), 2)
-                self.show_info(drawn_image)
+                #self.show_info(drawn_image)
 
                 for i in range(0, len(digits_to_validate)):
                     #prepare template to compare
@@ -247,19 +250,31 @@ class TestCaptchaSolver:
 
                     resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
                     image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template
-                    self.show_info(image_to_validate)
+                    #self.show_info(image_to_validate)
 
                     result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.2)
 
                     if result:
                         print(f"Success letter: {digits_to_validate[i]}")
+                        if i == 2:
+                            success = True
+                            self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+                            print("Sucess")
                     else:
                         break
+
+                if success:
+                    break                    
+
+            if success:
+                break
+            else:
+                self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
 
             
 
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+
 
 config_filename = "D:\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
 

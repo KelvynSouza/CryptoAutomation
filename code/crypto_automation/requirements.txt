@@ -11,4 +11,3 @@ pyparsing==2.4.7
 undetected-chromedriver
 fake-useragent
 PyAutoGUI
-pytesseract

@@ -115,18 +115,20 @@ class TestCaptchaSolver:
 
 
     def run(self):
-        slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
-                                                                [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, True)        
+             
 
         captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
 
         captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
         success = False
         for l in range(4):
-            slide_movement = 0
+            slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
+                                                                [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
+                                                                    0.05, False, True)   
 
-            self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+            slide_movement = 0            
+
+            
 
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
@@ -157,26 +159,34 @@ class TestCaptchaSolver:
                     digits_to_validate.append((number, position))
 
             digits_to_validate.sort(key=lambda tup: tup[1].x)             
+            numbers_to_detect  = [digit[0] for digit in digits_to_validate]
+            result_number_detection = numbers_to_detect.copy()
 
-            slide_movement += round(self.get_slide_width(captcha_contours) * 0.25)
-            self.__windows_action_helper.click_and_hold(slide_button.x + slide_movement, slide_button.y)
+            slide_width = self.get_slide_width(captcha_contours)
+            
+            first_slide_movement = round(slide_width * 0.25)
+            self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+            self.__windows_action_helper.click_and_hold(slide_button.x + first_slide_movement, slide_button.y)
             self.__windows_action_helper.click_and_hold(slide_button.x , slide_button.y)
 
             start_time = time.time()
-            seconds = 25
+            seconds = 10
 
             iteration = 0
+            
             #validate phases of captcha
-            while True:
+            while True and iteration < 5:
                 #check timeout
                 current_time = time.time() 
                 elapsed_time = current_time - start_time
+
                 if elapsed_time > seconds:  
+                    result_number_detection = numbers_to_detect
                     print(f"Timeout, Captcha number not found") 
                     start_time = time.time()
+                    slide_movement += round(slide_width * 0.25)
                     self.__windows_action_helper.click_and_hold(slide_button.x + slide_movement, slide_button.y) 
-                    iteration +=1            
-                    
+                    iteration += 1   
                 
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 
@@ -239,37 +249,43 @@ class TestCaptchaSolver:
                 self.draw_rectangles_in_image(drawn_image, contours,  (255,0,0), 2)
                 #self.show_info(drawn_image)
 
-                for i in range(0, len(digits_to_validate)):
+                l = 0
+                for i in list(result_number_detection):
                     #prepare template to compare
-                    template = cv2.imread(config['TEMPLATES'][f"complex_{digits_to_validate[i][0]}"])
+                    template = cv2.imread(config['TEMPLATES'][f"complex_{i}"])
 
                     grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                     
                     _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY) 
 
-                    x,y,w,h = contours[i]
+                    x,y,w,h = contours[l]
 
                     resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
                     image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template
                     #self.show_info(image_to_validate)
 
-                    result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.2)
+                    result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.1)
 
                     if result:
-                        print(f"Success letter: {digits_to_validate[i]}")
-                        if i == 2:
-                            success = True
-                            self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
-                            print("Sucess")
+                        print(f"Success number: {i}")
+                        result_number_detection.remove(i)
+                        if len(result_number_detection) == 0:
+                            success = True                            
+                            print("Success all")
+                            break
                     else:
+                        print(f"Failed number: {i}")
                         break
+
+                    l+=1
 
                 if success:
                     break                    
-
-            if success:
+            
+            self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+            
+            if success:                
                 break
-            else:
-                self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+            
 
             
 

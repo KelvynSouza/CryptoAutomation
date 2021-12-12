@@ -34,7 +34,7 @@ class GameStatusWatcherActions:
         status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,self.__config['RETRY'].getint('verify_error'))
         connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
-
+        
 
     def __open_chrome_and_goto_game(self):
         self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],

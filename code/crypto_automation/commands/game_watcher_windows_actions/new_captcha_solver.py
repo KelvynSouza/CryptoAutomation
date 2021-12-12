@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import time
 import threading
+import logging
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Thread
@@ -10,17 +11,18 @@ from crypto_automation.commands.shared.os_helper import create_log_folder
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 
 
-class TestCaptchaSolver:
-    def __init__(self, config: configparser):
+class NewCaptchaSolver:
+    def __init__(self, config: configparser, image_helper: ImageHelper, action_helper: WindowsActionsHelper):
         self.__config = config
-        self.__image_helper = ImageHelper()
-        self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
-        self.get_game_window()
+        self.__image_helper = image_helper
+        self.__windows_action_helper = action_helper        
         self.__captcha_contours = None
         self.lock = threading.Lock()
 
 
-    def run(self):
+    def solve_captcha(self):
+        logging.warning("Started solving captcha!")
+
         if self.__captcha_contours == None:
            self.__captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
 
@@ -142,7 +144,7 @@ class TestCaptchaSolver:
                 elapsed_time = current_time - start_time
 
                 if self.success == False and elapsed_time > seconds :  
-                    print(f"Timeout, Captcha number not found") 
+                    logging.warning(f"Timeout, Captcha number not found") 
                     iteration += 1  
                     if iteration < 5:
                         self.__result_number_detection = digits_to_validate.copy()
@@ -156,7 +158,8 @@ class TestCaptchaSolver:
                 if captcha_match:   
                     self.success = False
                     continue
-                else:            
+                else: 
+                    logging.warning("Captcha solved successfully!")            
                     break
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
@@ -178,30 +181,11 @@ class TestCaptchaSolver:
                 self.__result_number_detection.remove((p,i))
                 if len(self.__result_number_detection) == 0:
                     self.success = True      
-                    self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y - 100)                      
-                    print("success all")       
-        else: 
-            print(f"error getting letter: {i}")                      
+                    self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y - 100)                     
+                          
+                             
             
-        
-                        
-
-
-    def show_info(self, image, original=False, image_name = "Imagem"):
-        print('-----------------------------------------------------')  
-        print(image_name)  
-        print('shape:', image.shape, 'and', 'size:', image.size)    
-        print(image.dtype)
-        if original:
-            plt.imshow(image)
-        else:
-            if len(image.shape) < 3:
-                plt.imshow(image, cmap='gray')        
-            else:
-                plt.imshow(image[:,:,::-1])
-
-        plt.show()
-
+ 
 
     def getting_rectangle_countours(self, image_treated, h_min = None, h_max = None, w_min = None, w_max = None, find_mode = cv2.RETR_CCOMP, reduce_box_size_by = 0):
         contours, _ = cv2.findContours(image_treated, find_mode, cv2.CHAIN_APPROX_SIMPLE)
@@ -306,23 +290,3 @@ class TestCaptchaSolver:
                 x -= 40
                 w += 40
         return (x,y,w,h)
-
-    
-
-config_filename = "D:\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
-
-config = configparser.ConfigParser(
-    interpolation=configparser.ExtendedInterpolation())
-config.read(config_filename)
-config['TEMPLATES']['game_images_path'] = '..\\resources\\images\\game'
-config['TEMPLATES']['captcha_image_path'] = '..\\resources\\images\\game\\captcha'
-config['TEMPLATES']['captcha_simple_image_path'] = '..\\resources\\images\\game\\captcha\\simple'
-config['TEMPLATES']['captcha_complex_image_path'] = '..\\resources\\images\\game\\captcha\\complex'
-
-create_log_folder(config['COMMON']['log_path'],
-                  config['COMMON']['screenshots_path'])
-
-asd = TestCaptchaSolver(config)
-asd.run()
-
-

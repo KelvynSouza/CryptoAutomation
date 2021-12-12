@@ -7,7 +7,7 @@ import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
-from crypto_automation.commands.game_watcher_windows_actions.captcha_solver import CaptchaSolver
+from crypto_automation.commands.game_watcher_windows_actions.new_captcha_solver import NewCaptchaSolver
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Thread
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
@@ -18,7 +18,7 @@ class GameStatusWatcherActions:
         self.__config = config        
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
-        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
+        self.__captcha_solver = NewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
         self.lock = threading.Lock()
         self.__error_count = 0
         self.__error_time = None
@@ -34,7 +34,8 @@ class GameStatusWatcherActions:
         status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,self.__config['RETRY'].getint('verify_error'))
         connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
         hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
-
+        rumble_mouse = Thread(self.__thread_safe, self.__windows_action_helper.rumble_mouse, self.__config['RETRY'].getint('rumble_mouse'))
+        
 
     def __open_chrome_and_goto_game(self):
         self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],
@@ -72,11 +73,12 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02, should_thrown=False)
 
-        time.sleep(5)
+        #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
+        #time.sleep(5)
 
-        self.__reload_page()
+        #self.__reload_page()
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+        #self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 

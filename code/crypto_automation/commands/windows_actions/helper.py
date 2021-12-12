@@ -83,14 +83,21 @@ class WindowsActionsHelper:
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y,0,0) 
 
 
-    def release_click(self, x, y):       
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  
+    def release_click(self, x, y):   
+        pyautogui.click(x, y, duration=1)
+        #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  
 
 
     def __click(self, x, y):
         win32api.SetCursorPos((x, y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x, y,0,0)        
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)   
+
+
+    def rumble_mouse(self):
+        pyautogui.moveRel(25, duration=0.3)
+        pyautogui.moveRel(-50, duration=0.3)
+        pyautogui.moveRel(25, duration=0.3)
 
 
     def write_at(self, x, y, text):

@@ -94,6 +94,12 @@ class WindowsActionsHelper:
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)   
 
 
+    def rumble_mouse(self):
+        pyautogui.moveRel(25, duration=0.3)
+        pyautogui.moveRel(-50, duration=0.3)
+        pyautogui.moveRel(25, duration=0.3)
+
+
     def write_at(self, x, y, text):
         self.click_on(x, y)
         pyautogui.typewrite(text, interval=random_number_between(0.1, 0.4))

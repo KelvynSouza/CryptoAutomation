@@ -2,6 +2,7 @@ import configparser
 import cv2
 import numpy as np
 import time
+import multiprocessing
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.os_helper import create_log_folder
@@ -14,6 +15,187 @@ class TestCaptchaSolver:
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)
         self.get_game_window()
+        self.__captcha_contours = None
+
+
+    def run(self):
+        if self.__captcha_contours == None:
+           self.__captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
+
+        captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
+
+        success = False
+        for l in range(4):            
+        
+            slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
+                                                                [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
+                                                                    0.05, False, False)   
+            
+            captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
+
+            desktop_game_gray = cv2.cvtColor(captcha_image, cv2.COLOR_BGR2GRAY) 
+            _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV) 
+
+            #Create a structure to aggregate incomplete elements
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
+            cv2.dilate(thresh_image,kernel,thresh_image, iterations = 1)
+
+            # get the contours and hierarchy so that we can filter only the contours from the digits
+            contours, hierarchy  = cv2.findContours(thresh_image, cv2.RETR_CCOMP , cv2.CHAIN_APPROX_SIMPLE)
+            hierarchy = hierarchy[0] # get the actual inner list of hierarchy descriptions
+
+            newContours = list()
+            for currentContour, currentHierarchy in zip(contours, hierarchy):  
+                # these are the innermost child components for the outermost,
+                # you should use currentHierarchy[3] < 0          
+                if currentHierarchy[2] < 0:                
+                    newContours.append(currentContour)  
+
+            digits_to_validate = self.get_correct_captcha_number(captcha_image)
+                        
+            digits_to_validate  = [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
+
+            self.__result_number_detection = digits_to_validate.copy()
+
+            slide_width = self.get_slide_width(self.__captcha_contours)
+            
+            
+            self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
+
+            first_slide_movement = round(slide_width * 0.25)
+            self.__windows_action_helper.move_to(slide_button.x + first_slide_movement, slide_button.y)
+            self.__windows_action_helper.move_to(slide_button.x , slide_button.y)          
+
+            seconds = 10
+            slide_movement = 0 
+            iteration = 0
+
+            start_time = time.time()
+
+            #validate phases of captcha
+            while success == False and iteration < 5:                  
+                
+                captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
+                
+                #fill numbers to extract for better extraction of the captcha 
+                cv2.drawContours(captcha_image, newContours, -1, (82,112,181), thickness=-1) 
+
+                mask = cv2.inRange(captcha_image, (250,250,250), (255,255,255))
+
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))        
+                to_validate_number = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=2)
+
+                cleaning_kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))    
+                to_locale_position = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cleaning_kernel, iterations=3)
+
+                #remove noise from image
+                rect_contours = self.getting_rectangle_countours(to_locale_position, 0,20,0,20)
+                to_locale_position = self.draw_rectangles_in_image(to_locale_position, rect_contours)  
+
+                #Close gaps from corrupted numbers
+                #One idea is start with low x value for structure and increase until we have only 3 contours 
+                # if it turns into 2 or less, we give up the image and try the take another        
+                aux_y = 0
+                for y in range(55, 80, 2):
+                    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(1, y))
+                    to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
+                    contours = self.getting_rectangle_countours(to_locale_position_morph, 100, 200, 5, 200)  
+
+                    if len(contours) == 3:
+                        aux_y = y
+                        break  
+                    
+                temp_contours = list()
+                for x in range(1, 30, 2):
+                    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(x, aux_y if aux_y > 0 else 60))
+                    to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
+                    contours = self.getting_rectangle_countours(to_locale_position_morph, 90, 200, 5, 200)  
+
+                    if len(contours) == 3:
+                        temp_contours = contours                
+                    elif len(contours) < 3:
+                        if len(temp_contours) > 0:
+                            contours = temp_contours
+                            break
+                        
+                if len(contours) < 3:                    
+                    continue
+                
+                #fix border if its near the image's border
+                contours = [(contour[0], 25 if contour[1] == 0 else contour[1], contour[2], contour[3]) for contour in contours]
+
+                #Sort contours position to be equals to text position
+                contours.sort(key=lambda tup: tup[0])                 
+                
+                for p, i in list(self.__result_number_detection):
+                    #prepare template to compare
+                    template = cv2.imread(self.__config['TEMPLATES'][f"complex_{i}"])
+
+                    grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                     
+                    _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY) 
+
+                    x,y,w,h = self.resolve_contours_exception(i, contours[p])
+
+                    resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
+                    image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template                    
+
+                    result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.12)
+
+                    if result:
+                        self.__result_number_detection.remove((p,i))
+                        if len(self.__result_number_detection) == 0:
+                            success = True      
+                            self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y - 100)                      
+                            print("Success all")                            
+                            break
+                    else: 
+                        print(f"error getting letter: {i}")                      
+                        break                    
+                                   
+
+                #check timeout
+                current_time = time.time() 
+                elapsed_time = current_time - start_time
+
+                if success == False and elapsed_time > seconds :  
+                    print(f"Timeout, Captcha number not found") 
+                    iteration += 1  
+                    if iteration < 5:
+                        self.__result_number_detection = digits_to_validate.copy()
+                        slide_movement += round(slide_width * 0.25)
+                        self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                      
+                        start_time = time.time()               
+            
+            self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+
+            if success: 
+                captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 5, 0.05, False, False)
+                if captcha_match:   
+                    continue
+                else:            
+                    break
+
+    def validate_captcha(self, digit, contours, to_validate_number, slide_button, slide_movement):        
+        p, i = digit
+        #prepare template to compare
+        template = cv2.imread(self.__config['TEMPLATES'][f"complex_{i}"])
+        grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                     
+        _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY) 
+        x,y,w,h = self.resolve_contours_exception(i, contours[p])
+        resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
+        image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template                    
+        result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.12)
+        if result:
+            self.__result_number_detection.remove((p,i))
+            if len(self.__result_number_detection) == 0:
+                success = True      
+                self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y - 100)                      
+                print("Success all")       
+        else: 
+            print(f"error getting letter: {i}")                      
+            
+        
+                        
 
 
     def show_info(self, image, original=False, image_name = "Imagem"):
@@ -114,183 +296,29 @@ class TestCaptchaSolver:
         return w
 
 
-    def run(self):
-             
+    def get_correct_captcha_number(self, captcha_image):
+        #get numbers to validate
+        digits_to_validate = list()
+        for number in range(10):
+            template = cv2.imread(self.__config['TEMPLATES'][f"simple_{number}"])
+            position = self.__image_helper.find_exact_match_position(template, captcha_image, True, 0.01)
+            if position:
+                digits_to_validate.append((number, position))
 
-        captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
+        digits_to_validate.sort(key=lambda tup: tup[1].x) 
 
-        captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
-        success = False
-        for l in range(4):
-            slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
-                                                                [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, True)   
-
-            slide_movement = 0            
-
-            
-
-            captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-
-            desktop_game_gray = cv2.cvtColor(captcha_image, cv2.COLOR_BGR2GRAY) 
-            _, thresh_image = cv2.threshold(desktop_game_gray, 91, 255, cv2.THRESH_BINARY_INV) 
-
-            #Create a structure to aggregate incomplete elements
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))
-            cv2.dilate(thresh_image,kernel,thresh_image, iterations = 1)
-
-            # get the contours and hierarchy so that we can filter only the contours from the digits
-            contours, hierarchy  = cv2.findContours(thresh_image, cv2.RETR_CCOMP , cv2.CHAIN_APPROX_SIMPLE)
-            hierarchy = hierarchy[0] # get the actual inner list of hierarchy descriptions
-
-            newContours = list()
-            for currentContour, currentHierarchy in zip(contours, hierarchy):  
-                # these are the innermost child components for the outermost,
-                # you should use currentHierarchy[3] < 0          
-                if currentHierarchy[2] < 0:                
-                    newContours.append(currentContour)  
-
-            #get numbers to validate
-            digits_to_validate = list()
-            for number in range(10):
-                template = cv2.imread(config['TEMPLATES'][f"simple_{number}"])
-                position = self.__image_helper.find_exact_match_position(template, captcha_image, True, 0.01)
-                if position:
-                    digits_to_validate.append((number, position))
-
-            digits_to_validate.sort(key=lambda tup: tup[1].x)             
-            numbers_to_detect  = [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
-            result_number_detection = numbers_to_detect.copy()
-
-            slide_width = self.get_slide_width(captcha_contours)
-            
-            first_slide_movement = round(slide_width * 0.25)
-            self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
-            self.__windows_action_helper.click_and_hold(slide_button.x + first_slide_movement, slide_button.y)
-            self.__windows_action_helper.click_and_hold(slide_button.x , slide_button.y)
-
-            start_time = time.time()
-            seconds = 10
-
-            iteration = 0
-            
-            #validate phases of captcha
-            while True and iteration < 5:
-                #check timeout
-                current_time = time.time() 
-                elapsed_time = current_time - start_time
-
-                if elapsed_time > seconds:  
-                    result_number_detection = numbers_to_detect.copy()
-                    print(f"Timeout, Captcha number not found") 
-                    start_time = time.time()
-                    slide_movement += round(slide_width * 0.25)
-                    self.__windows_action_helper.click_and_hold(slide_button.x + slide_movement, slide_button.y) 
-                    iteration += 1   
-                
-                captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-                
-                #fill numbers to extract for better extraction of the captcha 
-                cv2.drawContours(captcha_image, newContours, -1, (82,112,181), thickness=-1) 
-
-                mask = cv2.inRange(captcha_image, (250,250,250), (255,255,255))
-
-                kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))        
-                to_validate_number = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=2)
-
-                cleaning_kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))    
-                to_locale_position = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cleaning_kernel, iterations=3)
-
-                #remove noise from image
-                rect_contours = self.getting_rectangle_countours(to_locale_position, 0,20,0,20)
-                to_locale_position = self.draw_rectangles_in_image(to_locale_position, rect_contours)         
-
-                #self.show_info(to_validate_number,  image_name="Image to validate number")
-                #self.show_info(to_locale_position,  image_name="Image to get number position")
-
-                #Close gaps from corrupted numbers
-                #One idea is start with low x value for structure and increase until we have only 3 contours 
-                # if it turns into 2 or less, we give up the image and try the take another        
-                aux_y = 0
-                for y in range(55, 80, 2):
-                    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(1, y))
-                    to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
-                    contours = self.getting_rectangle_countours(to_locale_position_morph, 90, 200, 5, 200)  
-
-                    if len(contours) == 3:
-                        aux_y = y
-                        break  
-
-                temp_contours = list()
-                for x in range(1, 30, 2):
-                    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(x, aux_y if aux_y > 0 else 60))
-                    to_locale_position_morph = cv2.morphologyEx(to_locale_position, cv2.MORPH_CLOSE, kernel)
-                    contours = self.getting_rectangle_countours(to_locale_position_morph, 90, 200, 5, 200)  
-
-                    if len(contours) == 3:
-                        temp_contours = contours                
-                    elif len(contours) < 3:
-                        if len(temp_contours) > 0:
-                            contours = temp_contours
-                            break
-                        
-                if len(contours) < 3:
-                    print("Error getting numbers position")
-                    continue
-
-                #fix border if its near the image's border
-                contours = [(contour[0], 20 if contour[1] == 0 else contour[1], contour[2], contour[3]) for contour in contours]
-
-                #Sort contours position to be equals to text position
-                contours.sort(key=lambda tup: tup[0])       
-
-                #self.show_info(to_locale_position_morph)
-                drawn_image = np.copy(captcha_image)
-                self.draw_rectangles_in_image(drawn_image, contours,  (255,0,0), 2)
-                #self.show_info(drawn_image)
-
-                l = 0
-                for p, i in list(result_number_detection):
-                    #prepare template to compare
-                    template = cv2.imread(config['TEMPLATES'][f"complex_{i}"])
-
-                    grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                     
-                    _, thresh_digit_template = cv2.threshold(grey_digit_template, 200, 255, cv2.THRESH_BINARY) 
-
-                    x,y,w,h = contours[p]
-
-                    resized_template = cv2.resize(thresh_digit_template, (w,h) , interpolation = cv2.INTER_LANCZOS4)
-                    image_to_validate = to_validate_number[y:y+h, x:x+w] + resized_template
-                    #self.show_info(image_to_validate)
-
-                    result = self.__image_helper.find_exact_match_position(resized_template, image_to_validate, False, 0.1)
-
-                    if result:
-                        print(f"Success number: {i}")
-                        result_number_detection.remove((p,i))
-                        if len(result_number_detection) == 0:
-                            success = True                            
-                            print("Success all")
-                            break
-                    else:
-                        print(f"Failed number: {i}")
-                        break
-
-                    l+=1
-
-                if success:
-                    break                    
-            
-            self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
-
-            if success:                
-                break
-            
-
-            
+        return digits_to_validate
 
 
+    def resolve_contours_exception(self, number, contour):
+        x,y,w,h = contour
+        if number == 4:
+            if(w < 25):
+                x -= 40
+                w += 40
+        return (x,y,w,h)
 
+    
 
 config_filename = "D:\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
 

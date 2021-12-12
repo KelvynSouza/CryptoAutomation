@@ -135,7 +135,7 @@ class GameStatusWatcherActions:
             self.__restart_game()
         else:
             self.__find_and_click_by_template(
-                self.__config['TEMPLATES']['exit_button'], 0.03, should_grayscale=False)
+                self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
 
 
     def __verify_and_handle_heroes_status(self):
@@ -152,7 +152,7 @@ class GameStatusWatcherActions:
             self.__windows_action_helper.save_screenshot_log()
             self.__click_all_work_buttons()
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
 

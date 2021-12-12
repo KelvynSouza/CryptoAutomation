@@ -29,7 +29,7 @@ class NewCaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
 
         self.success = False
-        for l in range(4):            
+        for l in range(3):            
         
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
@@ -163,6 +163,10 @@ class NewCaptchaSolver:
                     break
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+
+        if l == 2 and self.success == False:
+            logging.warning("Couldn't  solve captcha!")
+
             
                 
 

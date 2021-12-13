@@ -33,7 +33,7 @@ class NewCaptchaSolver:
         
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, False)   
+                                                                    0.05, True, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
@@ -78,7 +78,19 @@ class NewCaptchaSolver:
 
             #validate phases of captcha
             while self.success == False and iteration < 5:                  
-                
+                 #check timeout
+                current_time = time.time() 
+                elapsed_time = current_time - start_time
+
+                if self.success == False and elapsed_time > seconds :  
+                    logging.warning(f"Timeout, Captcha number not found") 
+                    iteration += 1  
+                    if iteration < 5:
+                        self.__result_number_detection = digits_to_validate.copy()
+                        slide_movement += round(slide_width * 0.25)
+                        self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                      
+                        start_time = time.time() 
+
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 
                 #fill numbers to extract for better extraction of the captcha 
@@ -137,20 +149,7 @@ class NewCaptchaSolver:
                     threads.append(Thread(self.validate_captcha, (p, i), contours, to_validate_number, slide_button, slide_movement))             
                                    
                 for x in threads:
-                    x.join()
-
-                #check timeout
-                current_time = time.time() 
-                elapsed_time = current_time - start_time
-
-                if self.success == False and elapsed_time > seconds :  
-                    logging.warning(f"Timeout, Captcha number not found") 
-                    iteration += 1  
-                    if iteration < 5:
-                        self.__result_number_detection = digits_to_validate.copy()
-                        slide_movement += round(slide_width * 0.25)
-                        self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                      
-                        start_time = time.time()               
+                    x.join()                             
             
             if self.success:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y - 100) 
@@ -165,7 +164,8 @@ class NewCaptchaSolver:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
 
         if l == 2 and self.success == False:
-            logging.warning("Couldn't  solve captcha!")
+            raise Exception("Couldn't  solve captcha!")
+            
 
             
                 

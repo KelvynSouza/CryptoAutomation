@@ -165,7 +165,8 @@ class NewCaptchaSolver:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
 
         if l == 2 and self.success == False:
-            logging.warning("Couldn't  solve captcha!")
+            raise Exception("Couldn't  solve captcha!")
+            
 
             
                 

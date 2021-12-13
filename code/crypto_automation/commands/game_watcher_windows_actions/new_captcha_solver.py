@@ -33,7 +33,7 @@ class NewCaptchaSolver:
         
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, False)   
+                                                                    0.05, True, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 

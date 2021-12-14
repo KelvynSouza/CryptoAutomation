@@ -15,7 +15,7 @@ class WindowsActionsHelper:
     def __init__(self, config, image_helper: ImageHelper = None):
         self.__config = config
         self.__image_helper = image_helper
-        pyautogui.FAILSAFE = False
+        #pyautogui.FAILSAFE = False
 
     
     def move_to(self, x, y):
@@ -83,9 +83,8 @@ class WindowsActionsHelper:
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, x, y,0,0) 
 
 
-    def release_click(self, x, y):   
-        pyautogui.click(x, y, duration=1)
-        #win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  
+    def release_click(self, x, y):           
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x, y,0,0)  
 
 
     def __click(self, x, y):
@@ -114,9 +113,10 @@ class WindowsActionsHelper:
         return image_np[:, :, ::-1].copy()  
         
 
-    def save_screenshot_log(self, grayscale = True):
+    def save_screenshot_log(self, grayscale = True, original_resolution = False):
         image = self.take_screenshot()
-        image = self.__image_helper.rescale_frame(image, 50 ,convert_grayscale=grayscale)         
+        if original_resolution == False:
+            image = self.__image_helper.rescale_frame(image, 50 ,convert_grayscale=grayscale)         
         date_time = datetime.now().strftime("%Y-%m-%d %H_%M_%S")
         screenshot_path = os.path.join( self.__config['COMMON']['screenshots_path'], date_time+'.png')
         cv2.imwrite(screenshot_path, image)

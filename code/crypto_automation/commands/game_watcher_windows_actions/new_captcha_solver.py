@@ -33,7 +33,7 @@ class NewCaptchaSolver:
         
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, True, False)   
+                                                                    0.02, True, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
@@ -61,12 +61,12 @@ class NewCaptchaSolver:
 
             self.__result_number_detection = digits_to_validate.copy()
 
-            slide_width = self.get_slide_width(self.__captcha_contours)
-            
+            slide_width = self.get_slide_width(self.__captcha_contours)            
             
             self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
 
             first_slide_movement = round(slide_width * 0.25)
+            
             self.__windows_action_helper.move_to(slide_button.x + first_slide_movement, slide_button.y)
             self.__windows_action_helper.move_to(slide_button.x , slide_button.y)          
 
@@ -90,7 +90,7 @@ class NewCaptchaSolver:
                         slide_movement += round(slide_width * 0.25)
                         self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                      
                         start_time = time.time() 
-
+                        
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 
                 #fill numbers to extract for better extraction of the captcha 
@@ -164,9 +164,7 @@ class NewCaptchaSolver:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
 
         if l == 2 and self.success == False:
-            raise Exception("Couldn't  solve captcha!")
-            
-
+            raise Exception("Couldn't solve captcha!")
             
                 
 
@@ -266,10 +264,14 @@ class NewCaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
 
         slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-        mask_slide = cv2.inRange(slide_info, (63,84,132), (65,86,134))        
+        mask_slide = cv2.inRange(slide_info, (61,81,129), (68,89,136))        
         
-        result = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
+        result = self.getting_rectangle_countours(mask_slide, 20, 40, 0, 0)
         _,_,w,_ = result[0]
+
+        if w < 1:
+            raise Exception("Couldn't get slide width!")
+
         return w
 
 

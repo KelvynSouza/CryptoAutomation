@@ -90,12 +90,7 @@ class NewCaptchaSolver:
                         slide_movement += round(slide_width * 0.25)
                         self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                      
                         start_time = time.time() 
-                        if slide_movement == 0:
-                            logging.error("Getting high resolution and colored image to debug error") 
-                            self.__windows_action_helper.save_screenshot_log(original_resolution=True)   
-                            slide_width = self.get_slide_width(self.__captcha_contours)         
-                            raise Exception(f"Couldn't get slide width, instead received {slide_movement}")
-
+                        
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 
                 #fill numbers to extract for better extraction of the captcha 
@@ -269,10 +264,13 @@ class NewCaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
 
         slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-        mask_slide = cv2.inRange(slide_info, (63,84,132), (65,86,134))        
+        mask_slide = cv2.inRange(slide_info, (61,81,129), (68,89,136))        
         
-        result = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
+        result = self.getting_rectangle_countours(mask_slide, 20, 40, 0, 0)
         _,_,w,_ = result[0]
+
+        if w < 1:
+            raise Exception("Couldn't get slide width!")
 
         return w
 

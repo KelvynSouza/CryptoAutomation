@@ -30,7 +30,7 @@ class TestCaptchaSolver:
         for l in range(4):            
         
             slide_button = self.__image_helper.wait_until_match_is_found(cv2.imread, 
-                                                                ['../resources/images/test/captcha_new/captcha_error.png'], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
+                                                                [captcha_screen_test], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                     0.05, False, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
@@ -246,7 +246,7 @@ class TestCaptchaSolver:
 
 
     def get_game_window(self):
-        desktop_image =  cv2.imread('../resources/images/test/captcha_new/captcha_error.png')
+        desktop_image =  cv2.imread(captcha_screen_test)
         desktop_image_gray = cv2.cvtColor(desktop_image, cv2.COLOR_BGR2GRAY)
         _, thresh_image = cv2.threshold(desktop_image_gray, 30, 255, cv2.THRESH_BINARY)        
         edg_img = cv2.Canny(thresh_image, 225, 255)
@@ -257,7 +257,7 @@ class TestCaptchaSolver:
 
 
     def get_game_window_image(self):
-        desktop_image = cv2.imread('../resources/images/test/captcha_new/captcha_error.png')
+        desktop_image = cv2.imread(captcha_screen_test)
         x_screen, y_screen, w_screen, h_screen = self.__game_window_position
         return desktop_image[y_screen:y_screen+h_screen,x_screen:x_screen+w_screen]
 
@@ -277,9 +277,10 @@ class TestCaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = captcha_contours
 
         slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-        mask_slide = cv2.inRange(slide_info, (63,84,132), (65,86,134))        
+        mask_slide = cv2.inRange(slide_info, (61,81,129), (68,89,136))        
         self.show_info(mask_slide, True)
-        result = self.getting_rectangle_countours(mask_slide, 0, 40, 0, 0)
+        self.show_info(slide_info, True)
+        result = self.getting_rectangle_countours(mask_slide, 20, 40, 0, 0)
         _,_,w,_ = result[0]
         return w
 
@@ -307,8 +308,9 @@ class TestCaptchaSolver:
         return (x,y,w,h)
 
     
+captcha_screen_test = '../resources/images/test/captcha_new/captcha_error.png'
 
-config_filename = "C:\\Users\\carlo\\Documents\\dev\\CryptoOcrAutomation\\code\\crypto_automation\\settings.ini"
+config_filename = "..\\settings.ini"
 
 config = configparser.ConfigParser(
     interpolation=configparser.ExtendedInterpolation())

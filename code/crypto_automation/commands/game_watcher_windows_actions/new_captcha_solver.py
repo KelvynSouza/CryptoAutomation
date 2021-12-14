@@ -82,8 +82,7 @@ class NewCaptchaSolver:
                 current_time = time.time() 
                 elapsed_time = current_time - start_time
 
-                if self.success == False and elapsed_time > seconds :  
-                    logging.warning(f"Timeout, Captcha number not found") 
+                if self.success == False and elapsed_time > seconds :                      
                     iteration += 1  
                     if iteration < 5:
                         self.__result_number_detection = digits_to_validate.copy()

@@ -24,7 +24,7 @@ class GameStatusWatcherActions:
         self.__error_time = None
 
 
-    def start_game(self):
+    def start_game(self):        
         try:
             self.__open_chrome_and_goto_game()
             logging.warning('Automation started succefully.')

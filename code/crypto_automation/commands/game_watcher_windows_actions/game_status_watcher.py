@@ -125,7 +125,7 @@ class GameStatusWatcherActions:
     def __validate_connection(self):
         logging.error('Checking game connection.')
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.01, should_grayscale=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.05, should_grayscale=False)
 
         time.sleep(5)
 

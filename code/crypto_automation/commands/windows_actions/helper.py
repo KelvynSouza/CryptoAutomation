@@ -15,7 +15,7 @@ class WindowsActionsHelper:
     def __init__(self, config, image_helper: ImageHelper = None):
         self.__config = config
         self.__image_helper = image_helper
-        #pyautogui.FAILSAFE = False
+        pyautogui.FAILSAFE = False
 
     
     def move_to(self, x, y):

@@ -9,7 +9,7 @@ from win32con import *
 from configparser import ConfigParser
 from crypto_automation.commands.game_watcher_windows_actions.new_captcha_solver import NewCaptchaSolver
 from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Thread
+from crypto_automation.commands.shared.thread_helper import Job
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 from crypto_automation.commands.shared.numbers_helper import random_waitable_number, random_number_between
 
@@ -31,11 +31,10 @@ class GameStatusWatcherActions:
         except BaseException:
             self.__check_possible_server_error()
 
-        rumble_mouse = Thread(self.__thread_safe, self.__windows_action_helper.rumble_mouse, self.__config['RETRY'].getint('rumble_mouse'))
-        status_handling = Thread(self.__thread_safe, self.__handle_unexpected_status,self.__config['RETRY'].getint('verify_error'))
-        connection_error_handling = Thread(self.__thread_safe, self.__validate_connection, self.__config['RETRY'].getint('verify_zero_coins'))
-        hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,self.__config['RETRY'].getint('verify_heroes_status'))
-        
+        self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), self.__windows_action_helper.rumble_mouse)
+        self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), self.__handle_unexpected_status)
+        self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), self.__validate_connection)
+        self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), self.__verify_and_handle_heroes_status)
         
 
     def __open_chrome_and_goto_game(self):
@@ -107,6 +106,14 @@ class GameStatusWatcherActions:
 
             self.__windows_action_helper.save_screenshot_log()
 
+        idle = True
+        if idle:
+            logging.error('Detected idle warning, pausing automation until its time to put the heroes to work again.')
+            self.__status_handling.pause()
+            self.__connection_error_handling.pause()
+            self.__rumble_mouse.pause()
+            self.__idle = True
+
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2, 0.05)
         if error:
             logging.error('Error on game, refreshing page.')
@@ -142,6 +149,14 @@ class GameStatusWatcherActions:
 
 
     def __verify_and_handle_heroes_status(self):
+        if self.__idle:
+            logging.error('Automation was pause, resuming activities.')            
+            self.__status_handling.resume()
+            self.__connection_error_handling.resume()
+            self.__rumble_mouse.resume()
+            self.__restart_game()
+            self.__idle = False
+
         logging.warning('Checking heroes status')
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
@@ -210,27 +225,24 @@ class GameStatusWatcherActions:
                                                                     0.02, True)
 
 
-    def __thread_safe(self, method, retrytime, positional_arguments = None, keyword_arguments = None):
-        error = False                
-        while True:            
-            with self.lock:                
-                try:               
-                    self.__execute_method(method, positional_arguments, keyword_arguments)
-                except BaseException as ex:
-                    logging.error('Error:' + traceback.format_exc())
-                    self.__windows_action_helper.save_screenshot_log()
+    def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
+        error = False   
+        with self.lock:                
+            try:               
+                self.__execute_method(method, positional_arguments, keyword_arguments)
+            except BaseException as ex:
+                logging.error('Error:' + traceback.format_exc())
+                self.__windows_action_helper.save_screenshot_log()
+                self.__check_possible_server_error()
+                error = True
+            finally:
+                try:
+                    if error:
+                        self.__restart_game()
+                        self.__execute_method(method, positional_arguments, keyword_arguments)
+                        error = False 
+                except:
                     self.__check_possible_server_error()
-                    error = True
-                finally:
-                    try:
-                        if error:
-                            self.__restart_game()
-                            self.__execute_method(method, positional_arguments, keyword_arguments)
-                            error = False 
-                    except:
-                        self.__check_possible_server_error()
-
-            time.sleep(retrytime*random_number_between(1.0, 2))
 
 
     def __execute_method(self, method, positional_arguments = None, keyword_arguments = None):

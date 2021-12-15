@@ -7,7 +7,7 @@ import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
-from crypto_automation.commands.game_watcher_windows_actions.new_captcha_solver import NewCaptchaSolver
+from crypto_automation.commands.game_watcher_windows_actions.second_captcha_solver import NewCaptchaSolver
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Thread
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper

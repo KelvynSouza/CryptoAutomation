@@ -20,6 +20,7 @@ class GameStatusWatcherActions:
         self.__captcha_solver = NewNewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)        
         self.__error_count = 0
         self.__error_time = None
+        self.__idle = False
         self.lock = threading.Lock()
 
 
@@ -119,6 +120,7 @@ class GameStatusWatcherActions:
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
             self.__idle = True
+            return
 
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2, 0.05)
         if error:

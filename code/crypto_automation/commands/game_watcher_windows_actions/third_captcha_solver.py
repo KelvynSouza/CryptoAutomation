@@ -14,7 +14,7 @@ class NewNewCaptchaSolver:
         self.__captcha_contours = None
 
 
-    def run(self): 
+    def solve_captcha(self): 
         logging.warning("Started solving captcha!")
         if self.__captcha_contours == None:
            self.__captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 

@@ -18,8 +18,12 @@ class WindowsActionsHelper:
         pyautogui.FAILSAFE = False
 
     
-    def move_to(self, x, y):
-        pyautogui.moveTo(x, y, random_waitable_number(self.__config), self.__random_tween())
+    def move_to(self, x, y, fast=False):
+        if fast:
+            duration = 0
+        else:
+            duration = random_waitable_number(self.__config)
+        pyautogui.moveTo(x, y, duration, self.__random_tween())
 
 
     def __random_tween(self):

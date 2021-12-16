@@ -35,6 +35,11 @@ class GameStatusWatcherActions:
         self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), self.__handle_unexpected_status)
         self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), self.__validate_connection)
         self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), self.__verify_and_handle_heroes_status)
+
+        self.__rumble_mouse.start()
+        self.__status_handling.start()
+        self.__connection_error_handling.start()
+        self.__hero_handling.start() 
         
 
     def __open_chrome_and_goto_game(self):
@@ -154,8 +159,9 @@ class GameStatusWatcherActions:
             self.__status_handling.resume()
             self.__connection_error_handling.resume()
             self.__rumble_mouse.resume()
-            self.__restart_game()
             self.__idle = False
+            self.__restart_game()
+            
 
         logging.warning('Checking heroes status')
 

@@ -4,19 +4,25 @@ from crypto_automation.commands.shared.numbers_helper import random_number_betwe
 
 
 class Job(threading.Thread):
-    def __init__(self, t, retrytime, *args, **kwargs):        
-        super(Job, self).__init__(target=t, *args, **kwargs)
+    def __init__(self, t, retrytime, *args, **kwargs):
+        super(Job, self).__init__()
+        self.__target = t  
+        self.__args = args
+        self.__kwargs =  kwargs  
+       
         self.__retrytime = retrytime
         self.__flag = threading.Event() # The flag used to pause the thread
         self.__flag.set() # Set to True
         self.__running = threading.Event() # Used to stop the thread identification
-        self.__running.set() # Set running to True        
-        self.start()
+        self.__running.set() # Set running to True   
 
 
-    def start(self):
-        while self.__running.isSet():           
-            super().run()          
+    def run(self):
+        while self.__running.isSet():
+            if self.__target:
+                self.__target(*self.__args, **self.__kwargs)
+            else:
+                raise Exception("Method not found for thread!")
             time.sleep(self.__retrytime*random_number_between(1.0, 2))
             self.__flag.wait() # return immediately when it is True, block until the internal flag is True when it is False
 

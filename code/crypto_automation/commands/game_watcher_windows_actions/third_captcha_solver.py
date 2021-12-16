@@ -25,7 +25,7 @@ class NewNewCaptchaSolver:
         for l in range(3): 
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
-                                                                    0.05, False, False)   
+                                                                    0.02, True, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]            
             
@@ -54,6 +54,11 @@ class NewNewCaptchaSolver:
                 if self.success == False:                                          
                     self.__windows_action_helper.move_to(slide_button.x + movement, slide_button.y)  
             
+            
+            metamask = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_welcome_text'], 2, 0.02)
+            if metamask:
+                self.success = True
+                
             if self.success:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y - 100) 
                 captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 5, 0.05, False, False)
@@ -168,7 +173,7 @@ class NewNewCaptchaSolver:
         y_end = round((game_y+captcha_y+captcha_h) - ((game_y+captcha_y+captcha_h) * 0.15))
         final_mask = np.zeros((captcha_h, captcha_w), np.uint8)
         for y in range(y_start, y_end, 10):
-            for x in range(game_x+captcha_x, (game_x+captcha_x+captcha_w), 20):                
+            for x in range(game_x+captcha_x, (game_x+captcha_x+captcha_w), 15):                
                 self.__windows_action_helper.move_to(x, y, True)
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
                 mask = cv2.inRange(captcha_image, (180,180,180), (220, 230, 245))

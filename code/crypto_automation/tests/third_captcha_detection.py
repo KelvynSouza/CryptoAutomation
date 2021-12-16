@@ -1,7 +1,7 @@
 import configparser
+import logging
 import cv2
 import numpy as np
-import time
 import threading
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
@@ -20,14 +20,15 @@ class TestCaptchaSolver:
         self.lock = threading.Lock()
 
 
-    def run(self):        
+    def run(self): 
+        logging.warning("Started solving captcha!")
         if self.__captcha_contours == None:
            self.__captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
 
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
 
         self.success = False
-        for l in range(4): 
+        for l in range(3): 
             slide_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
                                                                 [], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                     0.05, False, False)   
@@ -46,23 +47,27 @@ class TestCaptchaSolver:
             self.__windows_action_helper.move_to(slide_button.x , slide_button.y)          
 
             
-            slide_movement = 0 
-            iteration = 0
-
-            #validate phases of captcha
-            while self.success == False and iteration < 5: 
+            slide_movement = 0
+           
+            for movement in range(0, slide_width, 10):
+                slide_movement = movement
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
 
                 digits_to_validate = self.get_numbers_to_compare(captcha_image)
 
-                if(digits_to_validate):
-                    self.success = True
+                print("----------------")
+                print("Detected in phase:")
+                print(digits_to_validate)
+                print("expected values:")
+                print(true_captcha_numbers)
+                print("----------------")
 
-                if self.success == False:
-                    iteration += 1  
-                    if iteration < 5:                        
-                        slide_movement += round(slide_width * 0.25)
-                        self.__windows_action_helper.move_to(slide_button.x + slide_movement, slide_button.y)                     
+                if digits_to_validate == true_captcha_numbers:
+                    self.success = True
+                    break
+
+                if self.success == False:                                          
+                    self.__windows_action_helper.move_to(slide_button.x + movement, slide_button.y)                     
                                       
             
             if self.success:
@@ -71,10 +76,14 @@ class TestCaptchaSolver:
                 if captcha_match:   
                     self.success = False
                     continue
-                else:            
+                else: 
+                    logging.warning("Captcha solved successfully!")            
                     break
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+
+        if l == 2 and self.success == False:
+            raise Exception("Couldn't solve captcha!")
             
                 
 
@@ -169,10 +178,13 @@ class TestCaptchaSolver:
 
         slide_info = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
         mask_slide = cv2.inRange(slide_info, (61,81,129), (68,89,136))        
-        self.show_info(mask_slide, True)
-        self.show_info(slide_info, True)
+        
         result = self.getting_rectangle_countours(mask_slide, 20, 40, 0, 0)
         _,_,w,_ = result[0]
+
+        if w < 1:
+            raise Exception("Couldn't get slide width!")
+
         return w
 
 
@@ -181,7 +193,7 @@ class TestCaptchaSolver:
         digits_to_validate = list()
         for number in range(10):
             template = cv2.imread(self.__config['TEMPLATES'][f"simple_{number}"])
-            position = self.__image_helper.find_exact_match_position(template, captcha_image, True, 0.01)
+            position = self.__image_helper.find_exact_match_position(template, captcha_image, True, 0.05)
             if position:
                 digits_to_validate.append((number, position))
 
@@ -194,31 +206,42 @@ class TestCaptchaSolver:
         game_x, game_y, _, _ = self.__game_window_position
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
         
+        #'''
         y_start = round((game_y+captcha_y) + ((game_y+captcha_y) * 0.1))
         y_end = round((game_y+captcha_y+captcha_h) - ((game_y+captcha_y+captcha_h) * 0.15))
         final_mask = np.zeros((captcha_h, captcha_w), np.uint8)
         for y in range(y_start, y_end, 10):
-            for x in range(game_x+captcha_x, (game_x+captcha_x+captcha_w), 10):                
+            for x in range(game_x+captcha_x, (game_x+captcha_x+captcha_w), 20):                
                 self.__windows_action_helper.move_to(x, y, True)
                 captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-                mask = cv2.inRange(captcha_image, (200,200,200), (220, 230, 245))
+                mask = cv2.inRange(captcha_image, (180,180,180), (220, 230, 245))
                 final_mask = cv2.add(final_mask, mask)
-        
-        
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3,3))        
-        final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_OPEN, kernel)        
-        
+        #'''
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))        
+        final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_OPEN, kernel)
+    
+        cv2.dilate(final_mask, kernel, final_mask, iterations=2)
+        final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_CLOSE, kernel, iterations=1)   
+        cv2.erode(final_mask, kernel, final_mask, iterations=2)
+       
         digits_to_validate = list()
+                    
         for number in range(10):
-            template = cv2.imread(self.__config['TEMPLATES'][f"simple_{number}"])
-            _, thresh_image = cv2.threshold(template, 254, 255, cv2.THRESH_BINARY) 
-            position = self.__image_helper.find_exact_match_position(final_mask, thresh_image, False, 0.01)
+            template = cv2.imread(self.__config['TEMPLATES'][f"magnifier_{number}"])
+            grey_digit_template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)                
+            _, thresh_digit_template = cv2.threshold(grey_digit_template, 254, 255, cv2.THRESH_BINARY)  
+            
+            position = self.__image_helper.find_exact_match_position(final_mask, thresh_digit_template, False, 0.20)
             if position:
-                digits_to_validate.append((number, position))
-
+                digits_to_validate.append((number, position))        
+        
         digits_to_validate.sort(key=lambda tup: tup[1].x) 
+        
+        if len(digits_to_validate) != 3:
+            raise Exception("Captcha true numbers not foun.d")
 
-        digits_to_validate = [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
+        return [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
         
 
 
@@ -233,6 +256,7 @@ config['TEMPLATES']['game_images_path'] = '..\\resources\\images\\game'
 config['TEMPLATES']['captcha_image_path'] = '..\\resources\\images\\game\\captcha'
 config['TEMPLATES']['captcha_simple_image_path'] = '..\\resources\\images\\game\\captcha\\simple'
 config['TEMPLATES']['captcha_complex_image_path'] = '..\\resources\\images\\game\\captcha\\complex'
+config['TEMPLATES']['captcha_magnifier_image_path'] = '..\\resources\\images\\game\\captcha\\magnifier'
 
 create_log_folder(config['COMMON']['log_path'],
                   config['COMMON']['screenshots_path'])

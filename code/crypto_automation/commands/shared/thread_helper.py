@@ -14,12 +14,13 @@ class Job(threading.Thread):
         self.__flag = threading.Event() # The flag used to pause the thread
         self.__flag.set() # Set to True
         self.__running = threading.Event() # Used to stop the thread identification
-        self.__running.set() # Set running to True   
+        self.__running.set() # Set running to True 
+        self.lock = threading.Lock()  
 
 
     def run(self):
         while self.__running.isSet():
-            if self.__target:
+            if self.__target:                
                 self.__target(*self.__args, **self.__kwargs)
             else:
                 raise Exception("Method not found for thread!")

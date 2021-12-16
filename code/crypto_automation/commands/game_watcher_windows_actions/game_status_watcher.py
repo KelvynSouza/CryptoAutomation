@@ -1,6 +1,5 @@
-from os import times
-import time
 import threading
+import time
 import logging
 import traceback
 import datetime
@@ -18,10 +17,10 @@ class GameStatusWatcherActions:
         self.__config = config        
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
-        self.__captcha_solver = NewNewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
-        self.lock = threading.Lock()
+        self.__captcha_solver = NewNewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)        
         self.__error_count = 0
         self.__error_time = None
+        self.lock = threading.Lock()
 
 
     def start_game(self):        
@@ -78,9 +77,10 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'], should_thrown=False)
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
         #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
+        '''
         time.sleep(5)
 
         self.__reload_page()
@@ -88,6 +88,7 @@ class GameStatusWatcherActions:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        '''
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
@@ -232,8 +233,8 @@ class GameStatusWatcherActions:
 
 
     def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
-        error = False   
-        with self.lock:                
+        error = False 
+        with self.lock:   
             try:               
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:

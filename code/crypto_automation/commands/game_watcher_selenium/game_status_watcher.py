@@ -4,7 +4,7 @@ import logging
 import traceback
 from win32con import *
 from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Thread
+from crypto_automation.commands.shared.thread_helper import Job
 from crypto_automation.commands.web_manipulation.helper import SeleniumHelper
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 from configparser import ConfigParser
@@ -29,11 +29,11 @@ class GameStatusWatcherSelenium:
 
         self.__connect_wallet_and_start()
 
-        error_handling = Thread(self.__thread_safe, self.__verify_and_handle_game_error,
+        error_handling = Job(self.__thread_safe, self.__verify_and_handle_game_error,
                                 self.__config['RETRY'].getint('verify_error'))
-        newmap_handling = Thread(self.__thread_safe, self.__verify_and_handle_newmap,
+        newmap_handling = Job(self.__thread_safe, self.__verify_and_handle_newmap,
                                  self.__config['RETRY'].getint('verify_newmap'))
-        hero_handling = Thread(self.__thread_safe, self.__verify_and_handle_heroes_status,
+        hero_handling = Job(self.__thread_safe, self.__verify_and_handle_heroes_status,
                                self.__config['RETRY'].getint('verify_heroes_status'))
 
     def __connect_wallet_and_start(self, reconnect=False):

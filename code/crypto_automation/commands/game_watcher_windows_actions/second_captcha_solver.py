@@ -6,7 +6,7 @@ import threading
 import logging
 from matplotlib import pyplot as plt
 from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Thread
+from crypto_automation.commands.shared.thread_helper import Job
 from crypto_automation.commands.shared.os_helper import create_log_folder
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
 
@@ -144,7 +144,7 @@ class NewCaptchaSolver:
                 threads = list()
                 for p, i in list(self.__result_number_detection):
                     #prepare template to compare
-                    threads.append(Thread(self.validate_captcha, (p, i), contours, to_validate_number, slide_button, slide_movement))             
+                    threads.append(Job(self.validate_captcha, (p, i), contours, to_validate_number, slide_button, slide_movement))             
                                    
                 for x in threads:
                     x.join()                             

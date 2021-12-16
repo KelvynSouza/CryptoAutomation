@@ -71,8 +71,8 @@ class NewNewCaptchaSolver:
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
 
-        if l == 2 and self.success == False:
-            raise Exception("Couldn't solve captcha!")
+            if l == 2 and self.success == False:
+                raise Exception("Couldn't solve captcha!")
             
                 
     def getting_rectangle_countours(self, image_treated, h_min = None, h_max = None, w_min = None, w_max = None, find_mode = cv2.RETR_CCOMP, reduce_box_size_by = 0):

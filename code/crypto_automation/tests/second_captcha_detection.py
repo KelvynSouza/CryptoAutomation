@@ -27,8 +27,7 @@ class TestCaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
 
         self.success = False
-        for l in range(4):            
-        
+        for l in range(4):  
             slide_button = self.__image_helper.wait_until_match_is_found(cv2.imread, 
                                                                 [captcha_screen_test], self.__config['TEMPLATES']['captcha_slide'], self.__config['TIMEOUT'].getint('imagematching'), 
                                                                     0.05, False, False)   

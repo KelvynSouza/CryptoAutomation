@@ -7,7 +7,7 @@ import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
-from crypto_automation.commands.game_watcher_windows_actions.new_captcha_solver import NewCaptchaSolver
+from crypto_automation.commands.game_watcher_windows_actions.third_captcha_solver import NewNewCaptchaSolver
 from crypto_automation.commands.image_processing.helper import ImageHelper
 from crypto_automation.commands.shared.thread_helper import Job
 from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
@@ -18,7 +18,7 @@ class GameStatusWatcherActions:
         self.__config = config        
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
-        self.__captcha_solver = NewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
+        self.__captcha_solver = NewNewCaptchaSolver(config, self.__image_helper, self.__windows_action_helper)
         self.lock = threading.Lock()
         self.__error_count = 0
         self.__error_time = None

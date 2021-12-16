@@ -65,8 +65,7 @@ class NewCaptchaSolver:
             
             self.__windows_action_helper.click_and_hold(slide_button.x, slide_button.y)
 
-            first_slide_movement = round(slide_width * 0.25)
-            
+            first_slide_movement = round(slide_width * 0.25)            
             self.__windows_action_helper.move_to(slide_button.x + first_slide_movement, slide_button.y)
             self.__windows_action_helper.move_to(slide_button.x , slide_button.y)          
 

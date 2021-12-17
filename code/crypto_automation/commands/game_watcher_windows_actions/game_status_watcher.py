@@ -115,7 +115,7 @@ class GameStatusWatcherActions:
 
         idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.05)
         if idle:
-            logging.error('Detected idle warning, pausing automation until its time to put the heroes to work again.')
+            logging.error('Detected idle message, pausing automation until its time to put the heroes to work again.')
             self.__status_handling.pause()
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
@@ -158,7 +158,7 @@ class GameStatusWatcherActions:
 
     def __verify_and_handle_heroes_status(self):
         if self.__idle:
-            logging.error('Automation was pause, resuming activities.')            
+            logging.error('Automation was paused, resuming activities.')            
             self.__status_handling.resume()
             self.__connection_error_handling.resume()
             self.__rumble_mouse.resume()

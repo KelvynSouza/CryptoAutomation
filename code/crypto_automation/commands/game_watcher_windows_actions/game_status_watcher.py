@@ -90,9 +90,12 @@ class GameStatusWatcherActions:
         
         time.sleep(5)
 
+        self.__reload_page()
+
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])        
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 

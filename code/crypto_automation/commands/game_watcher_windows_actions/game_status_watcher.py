@@ -78,6 +78,11 @@ class GameStatusWatcherActions:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
+        sign_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 2, 0.05)
+
+        if not sign_button:
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+            
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
         #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen

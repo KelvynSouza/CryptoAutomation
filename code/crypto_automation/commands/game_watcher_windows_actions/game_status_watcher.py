@@ -81,7 +81,11 @@ class GameStatusWatcherActions:
 
         sign_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 2, 0.05)
 
-        if not sign_button:
+        if sign_button:
+            logging.warning('sign_button ok')
+
+        if sign_button == None:
+            logging.warning('sign_button not ok')
             self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
             
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])

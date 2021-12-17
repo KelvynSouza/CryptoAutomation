@@ -29,7 +29,7 @@ class GameStatusWatcherActions:
             self.__open_chrome_and_goto_game()
             logging.warning('Automation started succefully.')
         except BaseException as ex:
-            logging.warning('Error trying to start the game:' + ex);
+            logging.warning('Error trying to start the game:' + ex)
             self.__check_possible_server_error()
 
         self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), self.__windows_action_helper.rumble_mouse)

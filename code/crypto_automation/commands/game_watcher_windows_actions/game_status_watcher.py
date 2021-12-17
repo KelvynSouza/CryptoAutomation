@@ -94,6 +94,7 @@ class GameStatusWatcherActions:
             logging.warning('sign_button not ok')
             self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
             
+        logging.warning('Enter game metamask_sign_button')
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
 
         #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen

@@ -70,32 +70,21 @@ class GameStatusWatcherActions:
 
 
     def __enter_game(self):
-        logging.warning('Enter game section starting')
-
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        logging.warning('Enter game metamask_welcome_text')
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
 
-        logging.warning('Enter game metamask_password_input_inactive')
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02)
 
-        logging.warning('Enter game metamask_unlock_button')
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        logging.warning('Enter game find metamask_sign_button')
-        sign_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 2, 0.05)
+        # sign_button = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 5, 0.05)
 
-        if sign_button:
-            logging.warning('sign_button ok')
-
-        if sign_button == None:
-            logging.warning('sign_button not ok')
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+        # if sign_button == None:
+        #     self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
             
-        logging.warning('Enter game metamask_sign_button')
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'], 0.02)
 
         #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
         '''

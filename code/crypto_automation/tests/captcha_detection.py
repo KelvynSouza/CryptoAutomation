@@ -3,9 +3,9 @@ import cv2
 import numpy as np
 import time
 from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.os_helper import create_log_folder
-from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.os_helper import create_log_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class TestCaptchaSolver:

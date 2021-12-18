@@ -3,11 +3,9 @@ opencv-contrib-python
 numpy
 matplotlib
 spicy
-selenium
 keyring
 pywin32
 requests
-pyparsing==2.4.7
-undetected-chromedriver
+pyparsing
 fake-useragent
 PyAutoGUI

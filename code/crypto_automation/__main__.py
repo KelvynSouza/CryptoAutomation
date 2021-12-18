@@ -1,4 +1,4 @@
-from app import run
+from startup import run
 
 if __name__ == '__main__':
     run()

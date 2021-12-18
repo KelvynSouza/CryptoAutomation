@@ -4,10 +4,10 @@ import cv2
 import numpy as np
 import threading
 from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Thread
-from crypto_automation.commands.shared.os_helper import create_log_folder
-from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.thread_helper import Job
+from app.shared.os_helper import create_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class TestCaptchaSolver:
@@ -258,8 +258,8 @@ config['TEMPLATES']['captcha_simple_image_path'] = '..\\resources\\images\\game\
 config['TEMPLATES']['captcha_complex_image_path'] = '..\\resources\\images\\game\\captcha\\complex'
 config['TEMPLATES']['captcha_magnifier_image_path'] = '..\\resources\\images\\game\\captcha\\magnifier'
 
-create_log_folder(config['COMMON']['log_path'],
-                  config['COMMON']['screenshots_path'])
+create_folder(config['COMMON']['log_folder_path'])
+create_folder(config['COMMON']['screenshots_path'])
 
 asd = TestCaptchaSolver(config)
 asd.run()

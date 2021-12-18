@@ -6,11 +6,11 @@ import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
-from app.commands.captcha_solver import CaptchaSolver
-from app.shared.image_processing_helper import ImageHelper
-from app.shared.thread_helper import Job
-from app.shared.windows_action_helper import WindowsActionsHelper
-from app.shared.numbers_helper import random_waitable_number, random_number_between
+from crypto_automation.app.commands.captcha_solver import CaptchaSolver
+from crypto_automation.app.shared.image_processing_helper import ImageHelper
+from crypto_automation.app.shared.thread_helper import Job
+from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
+from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 
 class GameStatusWatcher:
     def __init__(self, config: ConfigParser):
@@ -32,10 +32,10 @@ class GameStatusWatcher:
         except BaseException:
             self.__check_possible_server_error()
 
-        self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), self.__windows_action_helper.rumble_mouse)
-        self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), self.__handle_unexpected_status)
-        self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), self.__validate_connection)
-        self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), self.__verify_and_handle_heroes_status)
+        self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), False, self.__windows_action_helper.rumble_mouse)
+        self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)
+        self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, self.__validate_connection)
+        self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, self.__verify_and_handle_heroes_status)
 
         self.__rumble_mouse.start()
         self.__status_handling.start()

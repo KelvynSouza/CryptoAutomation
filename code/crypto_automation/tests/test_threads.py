@@ -19,9 +19,9 @@ class TestThreadsSolution:
 
 
     def run(self): 
-        thread_1 = Job(self.thread_1, 0.1, "sucesso 1")
-        thread_2 = Job(self.thread_2, 0.1, "sucesso 2")
-        thread_3 = Job(self.thread_3, 0.1, "sucesso 3")
+        thread_1 = Job(self.thread_1, 0.1, False, "sucesso 1")
+        thread_2 = Job(self.thread_2, 0.1, False, "sucesso 2")
+        thread_3 = Job(self.thread_3, 0.1, False, "sucesso 3")
         
         thread_1.start()
         thread_2.start()

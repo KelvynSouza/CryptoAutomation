@@ -4,11 +4,11 @@ import cv2
 import numpy as np
 import threading
 from matplotlib import pyplot as plt
-from app.shared.image_processing_helper import ImageHelper
-from app.shared.thread_helper import Job
-from app.shared.os_helper import create_folder
-from app.shared.windows_action_helper import WindowsActionsHelper
-
+from crypto_automation.app.shared.thread_helper import Job
+from crypto_automation.app.shared.os_helper import create_folder
+from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
+from crypto_automation.app.shared.image_processing_helper import ImageHelper
+from crypto_automation.app.shared.numbers_helper import random_number_between
 
 class TestCaptchaSolver:
     def __init__(self, config: configparser):
@@ -34,7 +34,6 @@ class TestCaptchaSolver:
                                                                     0.05, False, False)   
             
             captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-            
             
             true_captcha_numbers = self.get_correct_captcha_number()
 
@@ -202,21 +201,21 @@ class TestCaptchaSolver:
         return [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
 
 
-    def get_correct_captcha_number(self):
-        game_x, game_y, _, _ = self.__game_window_position
+    signal = False
+    final_mask = []
+    def watch_and_treat_captcha_screen(self):
+        global signal
+        global final_mask
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
-        
-        #'''
-        y_start = round((game_y+captcha_y) + ((game_y+captcha_y) * 0.1))
-        y_end = round((game_y+captcha_y+captcha_h) - ((game_y+captcha_y+captcha_h) * 0.15))
+
+        screenshots = list()
+        while signal:
+            screenshots.append(self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w])
+
         final_mask = np.zeros((captcha_h, captcha_w), np.uint8)
-        for y in range(y_start, y_end, 10):
-            for x in range(game_x+captcha_x, (game_x+captcha_x+captcha_w), 20):                
-                self.__windows_action_helper.move_to(x, y, True)
-                captcha_image = self.get_game_window_image()[captcha_y:captcha_y+captcha_h,captcha_x:captcha_x+captcha_w]
-                mask = cv2.inRange(captcha_image, (180,180,180), (220, 230, 245))
-                final_mask = cv2.add(final_mask, mask)
-        #'''
+        for screenshot in screenshots:
+            mask = cv2.inRange(screenshot, (180,180,180), (220, 230, 245))
+            final_mask = cv2.add(final_mask, mask)
 
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))        
         final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_OPEN, kernel)
@@ -224,6 +223,31 @@ class TestCaptchaSolver:
         cv2.dilate(final_mask, kernel, final_mask, iterations=2)
         final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_CLOSE, kernel, iterations=1)   
         cv2.erode(final_mask, kernel, final_mask, iterations=2)
+
+
+    def get_correct_captcha_number(self):
+        global signal
+        global final_mask
+
+        game_x, game_y, _, _ = self.__game_window_position
+        captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
+        
+        signal = True
+        watch_captcha_reveal = Job(self.watch_and_treat_captcha_screen, 0, True)
+        watch_captcha_reveal.start()
+
+        x_start = game_x+captcha_x
+        x_end = game_x+captcha_x+captcha_w
+        y_start = round((game_y+captcha_y) + ((game_y+captcha_y) * 0.1))
+        y_end = round((game_y+captcha_y+captcha_h) - ((game_y+captcha_y+captcha_h) * 0.15))      
+        for y in range(y_start, y_end, 20):                           
+            self.__windows_action_helper.move_to(x_start, y, random_number_between(0.5, 0.7))
+            self.__windows_action_helper.move_to(x_end, y, random_number_between(1, 1.5), False)
+
+        signal = False
+        watch_captcha_reveal.join()
+
+        self.show_info(final_mask)        
        
         digits_to_validate = list()
                     
@@ -243,7 +267,6 @@ class TestCaptchaSolver:
 
         return [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
         
-
 
     
 

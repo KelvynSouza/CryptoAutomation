@@ -6,8 +6,8 @@ import os
 import numpy as np
 from datetime import datetime
 from win32con import *
-from app.shared.image_processing_helper import ImageHelper
-from app.shared.numbers_helper import random_waitable_number, random_number_between
+from crypto_automation.app.shared.image_processing_helper import ImageHelper
+from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 from random import randrange
 
 
@@ -18,12 +18,10 @@ class WindowsActionsHelper:
         pyautogui.FAILSAFE = False
 
     
-    def move_to(self, x, y, fast=False):
-        if fast:
-            duration = 0
-        else:
+    def move_to(self, x, y, duration=0, tween = True):
+        if duration == 0:
             duration = random_waitable_number(self.__config)
-        pyautogui.moveTo(x, y, duration, self.__random_tween())
+        pyautogui.moveTo(x, y, duration, self.__random_tween() if tween else pyautogui.linear)
 
 
     def __random_tween(self):

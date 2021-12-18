@@ -2,8 +2,8 @@ import configparser
 import logging
 import cv2
 import numpy as np
-from app.shared.image_processing_helper import ImageHelper
-from app.shared.windows_action_helper import WindowsActionsHelper
+from crypto_automation.app.shared.image_processing_helper import ImageHelper
+from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class CaptchaSolver:

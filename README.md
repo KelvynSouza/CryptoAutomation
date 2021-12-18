@@ -24,4 +24,5 @@ In the bat folder there is a .bat which will help to start the automation, but i
 When running the automation for the first time, you'll need to configure your MetaMask wallet, follow these steps:
 - On settings.ini, section "SECURITY", config "ispasswordsecured", set it to false.
 - Then in section "LOGIN", config "newpassword", type your MetaMask MetaMask password.
+- Change section "SECURITY", config "serviceid", to some random number of your liking
 After these steps the automation will encrypt your password and use it to log in your game. 

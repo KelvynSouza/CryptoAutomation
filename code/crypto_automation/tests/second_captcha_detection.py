@@ -131,7 +131,7 @@ class TestCaptchaSolver:
                 threads = list()
                 for p, i in list(self.__result_number_detection):
                     #prepare template to compare
-                    threads.append(Job(self.validate_captcha, (p, i), contours, to_validate_number, slide_button, slide_movement))             
+                    threads.append(Job(self.validate_captcha, 0, False, (p, i), contours, to_validate_number, slide_button, slide_movement))             
                                    
                 for x in threads:
                     x.join()

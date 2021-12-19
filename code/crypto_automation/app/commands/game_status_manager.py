@@ -119,7 +119,7 @@ class GameStatusManager:
 
         idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.05)
         if idle:
-            log.error('Detected idle message, pausing automation until its time to put the heroes to work again.')
+            log.error('Detected idle message, pausing automation until its time to put the heroes to work again.', self.__chat_bot)
             self.__status_handling.pause()
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
@@ -133,8 +133,7 @@ class GameStatusManager:
             self.__check_possible_server_error()
             self.__restart_game()
 
-        expected_screen = self.__image_helper.wait_until_match_is_found(
-            self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05)
+        expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05)
         if expected_screen == None:
             log.error('game on wrong page, refreshing page.', self.__chat_bot)
             log.image(self.__windows_action_helper, self.__chat_bot)

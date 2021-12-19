@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pyautogui
 from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
+from app.shared.image_processing_helper import ImageHelper
 
 
 #region Util

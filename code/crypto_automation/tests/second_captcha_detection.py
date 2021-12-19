@@ -4,10 +4,10 @@ import numpy as np
 import time
 import threading
 from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Job
-from crypto_automation.commands.shared.os_helper import create_log_folder
-from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.thread_helper import Job
+from app.shared.os_helper import create_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class TestCaptchaSolver:
@@ -131,7 +131,7 @@ class TestCaptchaSolver:
                 threads = list()
                 for p, i in list(self.__result_number_detection):
                     #prepare template to compare
-                    threads.append(Job(self.validate_captcha, (p, i), contours, to_validate_number, slide_button, slide_movement))             
+                    threads.append(Job(self.validate_captcha, 0, False, (p, i), contours, to_validate_number, slide_button, slide_movement))             
                                    
                 for x in threads:
                     x.join()
@@ -319,8 +319,8 @@ config['TEMPLATES']['captcha_image_path'] = '..\\resources\\images\\game\\captch
 config['TEMPLATES']['captcha_simple_image_path'] = '..\\resources\\images\\game\\captcha\\simple'
 config['TEMPLATES']['captcha_complex_image_path'] = '..\\resources\\images\\game\\captcha\\complex'
 
-create_log_folder(config['COMMON']['log_path'],
-                  config['COMMON']['screenshots_path'])
+create_folder(config['COMMON']['log_folder_path'])
+create_folder(config['COMMON']['screenshots_path'])
 
 asd = TestCaptchaSolver(config)
 asd.run()

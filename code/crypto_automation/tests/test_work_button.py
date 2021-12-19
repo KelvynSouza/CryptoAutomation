@@ -1,8 +1,11 @@
-import cv2
-import numpy as np
-import pyautogui
-from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
+import configparser
+import threading
+import time
+from app.commands.game_status_manager import GameStatusManager
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.numbers_helper import random_waitable_number
+from app.shared.os_helper import create_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 #region Util
@@ -32,8 +35,8 @@ template = cv2.imread(template_path)
 
 points = image_helper.find_exact_matches_position(image, template, False, 0.005)
 
-for x, y in points:
-    cv2.circle(image, (x, y), 5, (255,0,0), 3)
-    
-show_info(image)
-print('Final')
+create_folder(config['COMMON']['log_folder_path'])
+create_folder(config['COMMON']['screenshots_path'])
+
+asd = test(config)
+asd.run()

@@ -1,5 +1,5 @@
 # CryptoOcrAutomation
-## Requisitos
+## Requirements
 - Portuguese(Brazil) Windows language.
 - Game screen completely visible on the monitor.
 - Your computer must be configured to not disable your video after some time, this can be done in energy options.

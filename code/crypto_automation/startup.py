@@ -52,8 +52,10 @@ create_folder(config['COMMON']['screenshots_path'])
 
 logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['COMMON']['log_file'], encoding='utf-8', level=logging.WARNING)
 
-chat = ChatBotManager(config)
-chat.start()
+chat = None
+if config['TELEGRAM'].getboolean('integration'):
+    chat = ChatBotManager(config)
+    chat.start()
 
 error = 0
 

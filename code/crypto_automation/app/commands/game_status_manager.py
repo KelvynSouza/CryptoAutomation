@@ -12,7 +12,7 @@ from crypto_automation.app.shared.thread_helper import Job
 from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
 from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 
-class GameStatusWatcher:
+class GameStatusManager:
     def __init__(self, config: ConfigParser):
         self.__config = config        
         self.__image_helper = ImageHelper()

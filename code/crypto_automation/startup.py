@@ -2,7 +2,7 @@ import configparser
 import logging
 import traceback
 import keyring
-from app.commands.game_status_watcher import GameStatusWatcher
+from app.commands.game_status_manager import GameStatusManager
 from app.shared.os_helper import create_folder
 from app.shared.windows_action_helper import WindowsActionsHelper
 
@@ -13,7 +13,7 @@ def run():
     secure_passwords()
 
     try:
-        game_watcher = GameStatusWatcher(config)
+        game_watcher = GameStatusManager(config)
         game_watcher.start_game()
     except BaseException as ex:
         global error

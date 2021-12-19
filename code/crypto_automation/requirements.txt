@@ -9,3 +9,4 @@ requests
 pyparsing
 fake-useragent
 PyAutoGUI
+pyTelegramBotAPI

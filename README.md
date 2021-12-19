@@ -26,3 +26,13 @@ When running the automation for the first time, you'll need to configure your Me
 - Then in section "LOGIN", config "newpassword", type your MetaMask MetaMask password.
 - Change section "SECURITY", config "serviceid", to some random number of your liking
 After these steps the automation will encrypt your password and use it to log in your game. 
+
+## Telegram integration
+This automation has log integration with telegram, it needs some configuration to work.
+- Go to official telegram BotFather.
+- Create your bot and copy bot-token (example: 000000000:dlajhslfhasoçfiopahwf ) 
+- Start a conversation with the bot, so that the bot can send you messages.
+- On settings.ini, section "TELEGRAM", config "log_chat_token" paste the bot-token
+- Get your telegram chat_id in tha bot chat.
+- Go to https://t.me/userinfobot , send "/start" and copy your telegram id
+- On settings.ini, section "TELEGRAM", config "chat_id" past your telegram id

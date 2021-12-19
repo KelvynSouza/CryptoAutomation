@@ -1,4 +1,4 @@
-import win32api, win32con, win32gui
+import win32api, win32con
 import pyautogui
 import cv2 
 import subprocess

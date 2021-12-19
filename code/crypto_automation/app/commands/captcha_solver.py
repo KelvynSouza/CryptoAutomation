@@ -1,7 +1,8 @@
 import configparser
-import logging
 import cv2
 import numpy as np
+from crypto_automation.app.commands.chat_bot_manager import ChatBotManager
+import crypto_automation.app.shared.log_helper as log 
 from crypto_automation.app.shared.image_processing_helper import ImageHelper
 from crypto_automation.app.shared.numbers_helper import random_number_between
 from crypto_automation.app.shared.thread_helper import Job
@@ -9,15 +10,15 @@ from crypto_automation.app.shared.windows_action_helper import WindowsActionsHel
 
 
 class CaptchaSolver:
-    def __init__(self, config: configparser, image_helper: ImageHelper, action_helper: WindowsActionsHelper):
+    def __init__(self, config: configparser, image_helper: ImageHelper, action_helper: WindowsActionsHelper, chat_bot: ChatBotManager):
         self.__config = config
         self.__image_helper = image_helper
         self.__windows_action_helper = action_helper        
         self.__captcha_contours = None
-
+        self.__chat_bot = chat_bot
 
     def solve_captcha(self): 
-        logging.warning("Started solving captcha!")
+        log.warning("Started solving captcha!", self.__chat_bot)
         if self.__captcha_contours == None:
            self.__captcha_contours = self.get_captcha_window_contour(self.get_game_window_image()) 
 
@@ -56,10 +57,6 @@ class CaptchaSolver:
                 if self.success == False:                                          
                     self.__windows_action_helper.move_to(slide_button.x + movement, slide_button.y)  
             
-            
-            metamask = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_welcome_text'], 2, 0.02)
-            if metamask:
-                self.success = True
                 
             if self.success:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y - 100) 
@@ -68,15 +65,19 @@ class CaptchaSolver:
                     self.success = False
                     continue
                 else: 
-                    logging.warning("Captcha solved successfully!")            
+                    log.warning("Captcha solved successfully!", self.__chat_bot)
                     break
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
+                metamask = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_welcome_text'], 2, 0.02)
+                if metamask:
+                    log.warning("Captcha solved successfully!", self.__chat_bot)
+                    break
 
             if l == 2 and self.success == False:
                 raise Exception("Couldn't solve captcha!")
-            
-                
+
+
     def getting_rectangle_countours(self, image_treated, h_min = None, h_max = None, w_min = None, w_max = None, find_mode = cv2.RETR_CCOMP, reduce_box_size_by = 0):
         contours, _ = cv2.findContours(image_treated, find_mode, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -226,7 +227,6 @@ class CaptchaSolver:
         digits_to_validate.sort(key=lambda tup: tup[1].x) 
         
         if len(digits_to_validate) != 3:
-            raise Exception("Captcha true numbers not foun.d")
+            raise Exception("Captcha true numbers not found")
 
         return [(digit[0], digit[1][0]) for digit in zip(range(len(digits_to_validate)), digits_to_validate)]
-        

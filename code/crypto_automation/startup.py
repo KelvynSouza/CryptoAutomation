@@ -6,10 +6,10 @@ from app.commands.game_status_manager import GameStatusManager
 from app.shared.os_helper import create_folder
 from app.shared.windows_action_helper import WindowsActionsHelper
 from app.commands.chat_bot_manager import ChatBotManager
-
+import crypto_automation.app.shared.log_helper as log 
 
 def run():   
-    logging.warning('Starting automation.')
+    log.warning('Starting automation.', chat)
 
     try:
         secure_passwords()
@@ -19,8 +19,8 @@ def run():
     except BaseException as ex:
         global error
         error += 1
-        logging.error('Error:' + traceback.format_exc())
-        logging.warning('Restarting automation:')        
+        log.error('Error:' + traceback.format_exc())
+        log.warning('Restarting automation:', chat)        
 
         windows_helper = WindowsActionsHelper(config)
 

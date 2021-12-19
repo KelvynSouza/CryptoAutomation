@@ -19,7 +19,7 @@ class GameStatusManager:
         self.__config = config        
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
-        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper)  
+        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)  
         self.__lock = threading.Lock()      
         self.__error_count = 0
         self.__error_time = None
@@ -31,6 +31,8 @@ class GameStatusManager:
             self.__open_chrome_and_goto_game()
             log.warning('Automation started succefully.', self.__chat_bot)
         except BaseException:
+            log.error('Error:' + traceback.format_exc(), self.__chat_bot)
+            log.image(self.__windows_action_helper, self.__chat_bot)
             self.__check_possible_server_error()
 
         self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), False, self.__windows_action_helper.rumble_mouse)

@@ -28,3 +28,4 @@ class ChatBotManager:
     def start(self):
         pooling = Job(self.__bot.infinity_polling, 0, True)
         pooling.start()
+        

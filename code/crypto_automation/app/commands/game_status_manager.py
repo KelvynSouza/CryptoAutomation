@@ -123,7 +123,7 @@ class GameStatusManager:
             self.__status_handling.pause()
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
-            self.__windows_action_helper.save_screenshot_log()
+            log.image(self.__windows_action_helper, self.__chat_bot)
             self.__idle = True
             return
 

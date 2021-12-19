@@ -117,12 +117,13 @@ class GameStatusManager:
 
             log.image(self.__windows_action_helper, self.__chat_bot)
 
-        idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.05)
+        idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.02)
         if idle:
             log.error('Detected idle message, pausing automation until its time to put the heroes to work again.', self.__chat_bot)
             self.__status_handling.pause()
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
+            self.__windows_action_helper.save_screenshot_log()
             self.__idle = True
             return
 

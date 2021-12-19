@@ -1,11 +1,11 @@
 import configparser
 import threading
 import time
-from crypto_automation.commands.game_watcher_windows_actions.game_status_watcher import GameStatusWatcherActions
-from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.numbers_helper import random_waitable_number
-from crypto_automation.commands.shared.os_helper import create_log_folder
-from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
+from app.commands.game_status_manager import GameStatusManager
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.numbers_helper import random_waitable_number
+from app.shared.os_helper import create_log_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class test:

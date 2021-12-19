@@ -5,10 +5,10 @@ import cv2
 import numpy as np
 import threading
 from matplotlib import pyplot as plt
-from crypto_automation.commands.image_processing.helper import ImageHelper
-from crypto_automation.commands.shared.thread_helper import Job
-from crypto_automation.commands.shared.os_helper import create_log_folder
-from crypto_automation.commands.windows_actions.helper import WindowsActionsHelper
+from app.shared.image_processing_helper import ImageHelper
+from app.shared.thread_helper import Job
+from app.shared.os_helper import create_log_folder
+from app.shared.windows_action_helper import WindowsActionsHelper
 
 
 class TestThreadsSolution:
@@ -19,9 +19,9 @@ class TestThreadsSolution:
 
 
     def run(self): 
-        thread_1 = Job(self.thread_1, 0.1, "sucesso 1")
-        thread_2 = Job(self.thread_2, 0.1, "sucesso 2")
-        thread_3 = Job(self.thread_3, 0.1, "sucesso 3")
+        thread_1 = Job(self.thread_1, 0.1, False, "sucesso 1")
+        thread_2 = Job(self.thread_2, 0.1, False, "sucesso 2")
+        thread_3 = Job(self.thread_3, 0.1, False, "sucesso 3")
         
         thread_1.start()
         thread_2.start()

@@ -1,8 +1,10 @@
 import configparser
+import numpy as np
 import telebot
+import cv2
 from telebot import util
 from crypto_automation.app.shared.thread_helper import Job
-import cv2
+
 
 class ChatBotManager:
     def __init__(self, config: configparser):
@@ -18,9 +20,10 @@ class ChatBotManager:
         else:
             self.__bot.send_message(self.__chat_id, log_message, disable_notification=True)
 
-    def send_log_image(self, log_image):     
-        if log_image:
-            self.__bot.send_photo(self.__chat_id, cv2.imencode(log_image)[1].tostring(), disable_notification=True)
+    def send_log_image(self, log_image: np.array): 
+        if np.any(log_image):
+            image_to_send = cv2.imencode('.jpg', log_image)[1].tostring()        
+            self.__bot.send_photo(self.__chat_id, image_to_send, disable_notification=True)
 
     def start(self):
         pooling = Job(self.__bot.infinity_polling, 0, True)

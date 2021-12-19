@@ -1,34 +1,35 @@
 import threading
 import time
-import logging
 import traceback
 import datetime
 import keyring
 from win32con import *
 from configparser import ConfigParser
 from crypto_automation.app.commands.captcha_solver import CaptchaSolver
+from crypto_automation.app.commands.chat_bot_manager import ChatBotManager
 from crypto_automation.app.shared.image_processing_helper import ImageHelper
 from crypto_automation.app.shared.thread_helper import Job
 from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
+import crypto_automation.app.shared.log_helper as log 
 from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 
 class GameStatusManager:
-    def __init__(self, config: ConfigParser):
+    def __init__(self, config: ConfigParser, chat_bot: ChatBotManager):
+        self.__chat_bot = chat_bot
         self.__config = config        
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
         self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper)  
-        self.lock = threading.Lock()      
+        self.__lock = threading.Lock()      
         self.__error_count = 0
         self.__error_time = None
         self.__idle = False
         
 
-
-    def start_game(self):        
+    def start_game(self): 
         try:
             self.__open_chrome_and_goto_game()
-            logging.warning('Automation started succefully.')
+            log.warning('Automation started succefully.', self.__chat_bot)
         except BaseException:
             self.__check_possible_server_error()
 
@@ -104,19 +105,19 @@ class GameStatusManager:
     def __handle_unexpected_status(self):
         newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
         if newmap:
-            logging.warning('entering new map')
+            log.warning('entering new map', self.__chat_bot)
 
-            self.__windows_action_helper.save_screenshot_log()
+            log.image(self.__windows_action_helper, self.__chat_bot)
 
             self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
 
             time.sleep(5)
 
-            self.__windows_action_helper.save_screenshot_log()
+            log.image(self.__windows_action_helper, self.__chat_bot)
 
         idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.05)
         if idle:
-            logging.error('Detected idle message, pausing automation until its time to put the heroes to work again.')
+            log.error('Detected idle message, pausing automation until its time to put the heroes to work again.')
             self.__status_handling.pause()
             self.__connection_error_handling.pause()
             self.__rumble_mouse.pause()
@@ -125,31 +126,31 @@ class GameStatusManager:
 
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2, 0.05)
         if error:
-            logging.error('Error on game, refreshing page.')
-            self.__windows_action_helper.save_screenshot_log()
+            log.error('Error on game, refreshing page.', self.__chat_bot)
+            log.image(self.__windows_action_helper, self.__chat_bot)
             self.__check_possible_server_error()
             self.__restart_game()
 
         expected_screen = self.__image_helper.wait_until_match_is_found(
             self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05)
         if expected_screen == None:
-            logging.error('game on wrong page, refreshing page.')
-            self.__windows_action_helper.save_screenshot_log()
+            log.error('game on wrong page, refreshing page.', self.__chat_bot)
+            log.image(self.__windows_action_helper, self.__chat_bot)
             self.__restart_game()
 
 
     def __validate_connection(self):
-        logging.error('Checking game connection.')
+        log.error('Checking game connection.', self.__chat_bot)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.05, should_grayscale=False)
 
         time.sleep(5)
 
-        self.__windows_action_helper.save_screenshot_log()
+        log.image(self.__windows_action_helper, self.__chat_bot)
 
         error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['zero_coins_validator'], 2, 0.001, should_grayscale=False)
         if error:
-            logging.error('Error on game connection, refreshing page.')
+            log.error('Error on game connection, refreshing page.', self.__chat_bot)
             self.__check_possible_server_error()
             self.__restart_game()
         else:
@@ -159,7 +160,7 @@ class GameStatusManager:
 
     def __verify_and_handle_heroes_status(self):
         if self.__idle:
-            logging.error('Automation was paused, resuming activities.')            
+            log.error('Automation was paused, resuming activities.', self.__chat_bot)            
             self.__status_handling.resume()
             self.__connection_error_handling.resume()
             self.__rumble_mouse.resume()
@@ -167,7 +168,7 @@ class GameStatusManager:
             self.__restart_game()
             
 
-        logging.warning('Checking heroes status')
+        log.warning('Checking heroes status', self.__chat_bot)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
 
@@ -177,7 +178,7 @@ class GameStatusManager:
 
         if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
            or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
-            self.__windows_action_helper.save_screenshot_log()
+            log.image(self.__windows_action_helper, self.__chat_bot)
             self.__click_all_work_buttons()
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
@@ -237,12 +238,12 @@ class GameStatusManager:
 
     def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
         error = False 
-        with self.lock:   
+        with self.__lock:   
             try:               
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:
-                logging.error('Error:' + traceback.format_exc())
-                self.__windows_action_helper.save_screenshot_log()
+                log.error('Error:' + traceback.format_exc(), self.__chat_bot)
+                log.image(self.__windows_action_helper, self.__chat_bot)
                 self.__check_possible_server_error()
                 error = True
             finally:
@@ -267,14 +268,14 @@ class GameStatusManager:
 
 
     def __restart_game(self):
-        logging.warning('Restarting automation')
+        log.warning('Restarting automation', self.__chat_bot)
         self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
         self.__open_chrome_and_goto_game()
-        logging.warning('Restarted successfully')
+        log.warning('Restarted successfully', self.__chat_bot)
 
 
     def __check_possible_server_error(self):
-        logging.error(f"Checking for possible error on server.")
+        log.error(f"Checking for possible error on server.", self.__chat_bot)
         if self.__error_time:
             time_difference = (datetime.datetime.now() - self.__error_time)            
             if time_difference.total_seconds() <= self.__config['TIMEOUT'].getint('errors_time_difference'):
@@ -284,7 +285,7 @@ class GameStatusManager:
 
         if self.__error_count >= self.__config['TIMEOUT'].getint('errors_count_limit'):
             time_sleep = self.__config['TIMEOUT'].getint('server_error') * random_number_between(1.0,1.5)
-            logging.error(f"Error on server suspected, waiting {time_sleep} seconds to try again.")
+            log.error(f"Error on server suspected, waiting {time_sleep} seconds to try again.", self.__chat_bot)
             time.sleep(time_sleep)
             self.__error_count = 0
 

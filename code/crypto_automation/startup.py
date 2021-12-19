@@ -5,15 +5,16 @@ import keyring
 from app.commands.game_status_manager import GameStatusManager
 from app.shared.os_helper import create_folder
 from app.shared.windows_action_helper import WindowsActionsHelper
+from app.commands.chat_bot_manager import ChatBotManager
 
 
 def run():   
     logging.warning('Starting automation.')
 
-    secure_passwords()
-
     try:
-        game_watcher = GameStatusManager(config)
+        secure_passwords()
+
+        game_watcher = GameStatusManager(config, chat)
         game_watcher.start_game()
     except BaseException as ex:
         global error
@@ -51,4 +52,9 @@ create_folder(config['COMMON']['screenshots_path'])
 
 logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['COMMON']['log_file'], encoding='utf-8', level=logging.WARNING)
 
+chat = ChatBotManager(config)
+chat.start()
+
 error = 0
+
+

@@ -27,7 +27,7 @@ class GameStatusManager:
         self.__idle = False
         
 
-    def start_game(self): 
+    def start_game(self):         
         with self.__lock:
             try:
                 self.__open_chrome_and_goto_game()

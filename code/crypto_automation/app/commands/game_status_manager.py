@@ -37,12 +37,11 @@ class GameStatusManager:
                 log.image(self.__windows_action_helper, self.__chat_bot)
                 self.__check_possible_server_error()
 
-        self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), False, self.__windows_action_helper.rumble_mouse)
+
         self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)
         self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, self.__validate_connection)
         self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, self.__verify_and_handle_heroes_status)
 
-        self.__rumble_mouse.start()
         self.__status_handling.start()
         self.__connection_error_handling.start()
         self.__hero_handling.start() 

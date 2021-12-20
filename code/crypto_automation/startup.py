@@ -15,6 +15,7 @@ def run():
     secure_passwords()
     lock = threading.Lock()
     start_browser('chrome', lock)    
+    start_browser('edge', lock)    
     
 
 def secure_passwords():

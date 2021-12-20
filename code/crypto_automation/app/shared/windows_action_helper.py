@@ -164,6 +164,8 @@ class WindowsActionsHelper:
     def bring_window_foreground(self, name):        
         process = gw.getWindowsWithTitle(name)
         if len(process) > 0:
+            process[0].restore()
             process[0].activate()
+            process[0].maximise()            
         else:
             raise Exception("It is not possible to bring windows to Foreground!\nWindow not found!")

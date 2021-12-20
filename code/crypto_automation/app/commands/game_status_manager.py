@@ -28,13 +28,14 @@ class GameStatusManager:
         
 
     def start_game(self): 
-        try:
-            self.__open_chrome_and_goto_game()
-            log.warning('Automation started succefully.', self.__chat_bot)
-        except BaseException:
-            log.error('Error:' + traceback.format_exc(), self.__chat_bot)
-            log.image(self.__windows_action_helper, self.__chat_bot)
-            self.__check_possible_server_error()
+        with self.__lock:
+            try:
+                self.__open_chrome_and_goto_game()
+                log.warning('Automation started succefully.', self.__chat_bot)
+            except BaseException:
+                log.error('Error:' + traceback.format_exc(), self.__chat_bot)
+                log.image(self.__windows_action_helper, self.__chat_bot)
+                self.__check_possible_server_error()
 
         self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), False, self.__windows_action_helper.rumble_mouse)
         self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)

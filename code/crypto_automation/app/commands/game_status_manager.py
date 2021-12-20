@@ -14,13 +14,14 @@ import crypto_automation.app.shared.log_helper as log
 from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 
 class GameStatusManager:
-    def __init__(self, config: ConfigParser, chat_bot: ChatBotManager):
-        self.__chat_bot = chat_bot
-        self.__config = config        
+    def __init__(self, config: ConfigParser, password_access: str, chat_bot: ChatBotManager , lock: threading.Lock = None):
+        self.__config = config  
+        self.__password_access = password_access
+        self.__chat_bot = chat_bot              
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
         self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)  
-        self.__lock = threading.Lock()      
+        self.__lock = threading.Lock() if lock == None else lock    
         self.__error_count = 0
         self.__error_time = None
         self.__idle = False
@@ -47,9 +48,9 @@ class GameStatusManager:
         
 
     def __open_chrome_and_goto_game(self):
-        self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],
+        self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["browser_path"],
                                                                     self.__config['TEMPLATES']['incognito_icon'],
-                                                                    self.__config["WEBDRIVER"]["chrome_args"])
+                                                                    self.__config["WEBDRIVER"]["browser_args"])
 
         self.__open_game_website()
 
@@ -78,7 +79,7 @@ class GameStatusManager:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
 
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
-                                          keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02)
+                                          keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
@@ -240,7 +241,8 @@ class GameStatusManager:
 
     def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
         error = False 
-        with self.__lock:   
+        with self.__lock:  
+            self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
             try:               
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:
@@ -271,7 +273,7 @@ class GameStatusManager:
 
     def __restart_game(self):
         log.warning('Restarting automation', self.__chat_bot)
-        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
+        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['exe_name'])
         self.__open_chrome_and_goto_game()
         log.warning('Restarted successfully', self.__chat_bot)
 

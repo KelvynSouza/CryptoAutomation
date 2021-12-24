@@ -83,34 +83,16 @@ class GameStatusManager:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        #time.sleep(3)
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
+        else:  
+            self.__reload_page()
 
-        #self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])       
         
-        time.sleep(5)
-        
-        self.__reload_page()
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
-
-        time.sleep(3)
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
-
-        time.sleep(1)
-
-        #Gambiarra abaixo
-        if(self.__find_by_template(self.__config['TEMPLATES']['metamask_sign_button'])):
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
-
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
-        else:
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
-        
-
-        
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                       [], self.__config['TEMPLATES']['map_screen_validator'],
@@ -237,14 +219,6 @@ class GameStatusManager:
         captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 2, 0.05, False, False)
         if captcha_match:
             self.__captcha_solver.solve_captcha()
-
-    def __find_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):
-        result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
-
-        if result_match:
-            return True
-        else:
-            return False
             
 
     def __find_and_write_by_template(self, template_path, to_write, confidence_level=0.05, should_thrown=True):

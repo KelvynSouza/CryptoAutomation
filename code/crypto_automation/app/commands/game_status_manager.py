@@ -140,7 +140,7 @@ class GameStatusManager:
 
 
     def __validate_connection(self):
-        log.error('Checking game connection.', self.__chat_bot)
+        log.error(f"Checking game connection in {self.__config['WEBDRIVER']['name']}.", self.__chat_bot)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['treasure_chest_icon'], 0.05, should_grayscale=False)
 

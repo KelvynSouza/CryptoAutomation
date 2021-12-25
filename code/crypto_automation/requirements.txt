@@ -10,3 +10,4 @@ pyparsing
 fake-useragent
 PyAutoGUI
 pyTelegramBotAPI
+PyGetWindow

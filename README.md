@@ -1,4 +1,4 @@
-# CryptoOcrAutomation
+# CryptoAutomation
 ## Requirements
 - Portuguese(Brazil) Windows language.
 - Game screen completely visible on the monitor.

@@ -69,7 +69,7 @@ class CaptchaSolver:
                     break
             else:
                 self.__windows_action_helper.release_click(slide_button.x + slide_movement, slide_button.y)
-                metamask = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_welcome_text'], 5, 0.02)
+                metamask = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_welcome_text'], 2, 0.02)
                 if metamask:
                     log.warning("Captcha solved successfully!", self.__chat_bot)
                     break

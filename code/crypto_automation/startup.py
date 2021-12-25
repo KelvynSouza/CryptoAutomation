@@ -43,8 +43,8 @@ def start_browser(browser: str, lock: threading.Lock):
     except BaseException:
         global error
         error += 1
-        log.error('Error:' + traceback.format_exc())
-        log.warning('Restarting automation:', chat)        
+        log.error(f"Error in {browser}:" + traceback.format_exc())
+        log.warning(f"Restarting automation in {browser}:", chat)        
 
         windows_helper = WindowsActionsHelper(config)
 

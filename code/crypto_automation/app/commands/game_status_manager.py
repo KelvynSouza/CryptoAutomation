@@ -14,42 +14,43 @@ import crypto_automation.app.shared.log_helper as log
 from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 
 class GameStatusManager:
-    def __init__(self, config: ConfigParser, chat_bot: ChatBotManager):
-        self.__chat_bot = chat_bot
-        self.__config = config        
+    def __init__(self, config: ConfigParser, password_access: str, chat_bot: ChatBotManager , lock: threading.Lock = None):
+        self.__config = config  
+        self.__password_access = password_access
+        self.__chat_bot = chat_bot              
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
         self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)  
-        self.__lock = threading.Lock()      
+        self.__lock = threading.Lock() if lock == None else lock    
         self.__error_count = 0
         self.__error_time = None
         self.__idle = False
         
 
-    def start_game(self): 
-        try:
-            self.__open_chrome_and_goto_game()
-            log.warning('Automation started succefully.', self.__chat_bot)
-        except BaseException:
-            log.error('Error:' + traceback.format_exc(), self.__chat_bot)
-            log.image(self.__windows_action_helper, self.__chat_bot)
-            self.__check_possible_server_error()
+    def start_game(self):         
+        with self.__lock:
+            try:
+                self.__open_chrome_and_goto_game()
+                log.warning('Automation started succefully.', self.__chat_bot)
+            except BaseException:
+                log.error('Error:' + traceback.format_exc(), self.__chat_bot)
+                log.image(self.__windows_action_helper, self.__chat_bot)
+                self.__check_possible_server_error()
 
-        self.__rumble_mouse = Job(self.__thread_safe, self.__config['RETRY'].getint('rumble_mouse'), False, self.__windows_action_helper.rumble_mouse)
+
         self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)
         self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, self.__validate_connection)
         self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, self.__verify_and_handle_heroes_status)
 
-        self.__rumble_mouse.start()
         self.__status_handling.start()
         self.__connection_error_handling.start()
         self.__hero_handling.start() 
         
 
     def __open_chrome_and_goto_game(self):
-        self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["chrome_path"],
+        self.__windows_action_helper.open_and_maximise_front_window(self.__config["WEBDRIVER"]["browser_path"],
                                                                     self.__config['TEMPLATES']['incognito_icon'],
-                                                                    self.__config["WEBDRIVER"]["chrome_args"])
+                                                                    self.__config["WEBDRIVER"]["browser_args"])
 
         self.__open_game_website()
 
@@ -78,23 +79,19 @@ class GameStatusManager:
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
 
         self.__find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
-                                          keyring.get_password(self.__config['SECURITY']['serviceid'], "secret_password"), 0.02)
+                                          keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
+        else:  
+            self.__reload_page()
 
-        #they fixed the situation where it was needed to reload the page, for now lets comment this and see what happen
-        '''
-        time.sleep(5)
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        self.__reload_page()
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
-
-        self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
-        '''
-
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])       
+        
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
@@ -213,7 +210,7 @@ class GameStatusManager:
             count += 1
 
 
-    def __find_and_click_by_template(self, template_path, confidence_level=0.05, should_thrown=True, should_grayscale=True):
+    def __find_and_click_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
 
         if result_match:
@@ -240,7 +237,8 @@ class GameStatusManager:
 
     def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
         error = False 
-        with self.__lock:   
+        with self.__lock:  
+            self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
             try:               
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:
@@ -271,7 +269,7 @@ class GameStatusManager:
 
     def __restart_game(self):
         log.warning('Restarting automation', self.__chat_bot)
-        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['chrome_exe_name'])
+        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['exe_name'])
         self.__open_chrome_and_goto_game()
         log.warning('Restarted successfully', self.__chat_bot)
 

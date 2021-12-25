@@ -1,3 +1,4 @@
+import random
 import win32api, win32con
 import pyautogui
 import cv2 
@@ -60,6 +61,8 @@ class WindowsActionsHelper:
         
 
     def click_on(self, x, y):
+        x = x + random.randint(-6, 6)
+        y = y + random.randint(-6, 6)
         self.move_to(x, y)
         self.__click(x,y)
     

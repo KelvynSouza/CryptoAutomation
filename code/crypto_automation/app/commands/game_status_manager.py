@@ -83,12 +83,13 @@ class GameStatusManager:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 20, 0.05):
             self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
         else:  
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
+            if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 20, 0.05):
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
             
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
                     
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 

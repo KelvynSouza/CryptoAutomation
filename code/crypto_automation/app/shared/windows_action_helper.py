@@ -1,3 +1,4 @@
+import random
 import win32api, win32con
 import pyautogui
 import cv2 
@@ -6,6 +7,7 @@ import os
 import numpy as np
 from datetime import datetime
 from win32con import *
+import pygetwindow as gw
 from crypto_automation.app.shared.image_processing_helper import ImageHelper
 from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
 from random import randrange
@@ -59,6 +61,8 @@ class WindowsActionsHelper:
         
 
     def click_on(self, x, y):
+        x = x + random.randint(-6, 6)
+        y = y + random.randint(-6, 6)
         self.move_to(x, y)
         self.__click(x,y)
     
@@ -137,7 +141,7 @@ class WindowsActionsHelper:
         startupinf = subprocess.STARTUPINFO()
         # {"hide":0, "normal":1, "minimized":2,"maximized":3}
         startupinf.wShowWindow = 3 
-        subprocess.Popen(args, startupinfo=startupinf)  
+        test = subprocess.Popen(args, startupinfo=startupinf)          
         self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
                                                 [], image_validation_path, 
                                                     self.__config['TIMEOUT'].getint('imagematching'), 
@@ -159,3 +163,11 @@ class WindowsActionsHelper:
     def kill_process(self, process_name):
         subprocess.call("taskkill /im "+process_name+" /F")
         
+
+    def bring_window_foreground(self, name):        
+        process = gw.getWindowsWithTitle(name)
+        if len(process) > 0:            
+            process[0].activate()
+            process[0].maximize()            
+        else:
+            raise Exception("It is not possible to bring windows to Foreground!\nWindow not found!")

@@ -178,7 +178,8 @@ class GameStatusManager:
         if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
            or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
             log.image(self.__windows_action_helper, self.__chat_bot)
-            self.__click_all_work_buttons()
+            #self.__click_all_work_buttons()
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['all_heroes_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
@@ -208,7 +209,7 @@ class GameStatusManager:
             self.__windows_action_helper.click_and_scroll_down( last_button_x, last_button_y)
             result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
             count += 1
-
+        
 
     def __find_and_click_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)

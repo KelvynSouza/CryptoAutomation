@@ -172,10 +172,13 @@ class GameStatusManager:
 
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
-           or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
-            log.image(self.__windows_action_helper, self.__chat_bot)
-            self.__click_all_work_buttons()
+        # if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
+        #    or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
+        #     log.image(self.__windows_action_helper, self.__chat_bot)
+        #     self.__click_all_work_buttons()
+        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['all_button'], 2, 0.05, should_grayscale=False)):
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['all_button'])
+
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])

@@ -83,17 +83,22 @@ class GameStatusManager:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 20, 0.05):
             self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
-        else:  
-            self.__reload_page()
+           
+        elif self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 20, 0.05):
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
+            
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        else:
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
 
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-            time.sleep(5)
+                time.sleep(5)
 
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])       
-        
+                self.__find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+                    
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
@@ -175,10 +180,13 @@ class GameStatusManager:
 
         timeout = self.__config['TIMEOUT'].getint('imagematching')
 
-        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
-           or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
-            log.image(self.__windows_action_helper, self.__chat_bot)
-            self.__click_all_work_buttons()
+        # if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
+        #    or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
+        #     log.image(self.__windows_action_helper, self.__chat_bot)
+        #     self.__click_all_work_buttons()
+        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['all_button'], 2, 0.05, should_grayscale=False)):
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['all_button'])
+
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
@@ -187,27 +195,31 @@ class GameStatusManager:
 
 # region Util
     def __click_all_work_buttons(self):
-        result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
+        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['all_button'], 2, 0.05, should_grayscale=False)):
+            self.__find_and_click_by_template(self.__config['TEMPLATES']['all_button'])
+        
+        else:
+            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
 
-        count = 0
-        while len(result_match) == 0 and count <= 5:
-            result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.002, should_grayscale=False)
-            if result_active_match:
-                x_offset = -50
-                last_active_button_x, last_active_button_y = result_active_match[len(result_active_match)-1]
-                self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
+            count = 0
+            while len(result_match) == 0 and count <= 5:
+                result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.002, should_grayscale=False)
+                if result_active_match:
+                    x_offset = -50
+                    last_active_button_x, last_active_button_y = result_active_match[len(result_active_match)-1]
+                    self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
+                    result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
+                count += 1
+
+            count = 0
+            while len(result_match) > 0 and count <= 5:
+                for (x, y) in result_match:
+                    self.__windows_action_helper.click_on(x, y)
+                    time.sleep(random_waitable_number(self.__config))
+                last_button_x, last_button_y = result_match[len(result_match)-1]
+                self.__windows_action_helper.click_and_scroll_down( last_button_x, last_button_y)
                 result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
-            count += 1
-
-        count = 0
-        while len(result_match) > 0 and count <= 5:
-            for (x, y) in result_match:
-                self.__windows_action_helper.click_on(x, y)
-                time.sleep(random_waitable_number(self.__config))
-            last_button_x, last_button_y = result_match[len(result_match)-1]
-            self.__windows_action_helper.click_and_scroll_down( last_button_x, last_button_y)
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
-            count += 1
+                count += 1
 
 
     def __find_and_click_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):

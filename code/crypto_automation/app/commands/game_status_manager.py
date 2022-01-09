@@ -46,7 +46,7 @@ class GameStatusManager:
         self.__status_handling.start()
         self.__connection_error_handling.start()
         self.__hero_handling.start() 
-        self.__heroes_position_restarter.start() 
+        self.__heroes_position_restarter.start() if self.__config['RETRY'].getint('restart_heroes_position') > 0 else None
         
 
     def __open_chrome_and_goto_game(self):

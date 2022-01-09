@@ -41,10 +41,12 @@ class GameStatusManager:
         self.__status_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)
         self.__connection_error_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, self.__validate_connection)
         self.__hero_handling = Job(self.__thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, self.__verify_and_handle_heroes_status)
+        self.__heroes_position_restarter = Job(self.__thread_safe, self.__config['RETRY'].getint('restart_heroes_position'), False, self.__restart_heroes_position)
 
         self.__status_handling.start()
         self.__connection_error_handling.start()
         self.__hero_handling.start() 
+        self.__heroes_position_restarter.start() 
         
 
     def __open_chrome_and_goto_game(self):
@@ -185,6 +187,16 @@ class GameStatusManager:
             log.image(self.__windows_action_helper, self.__chat_bot)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
+
+        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
+
+
+    def __restart_heroes_position(self):
+        log.warning(f"Restarting heroes position in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
+
+        self.__find_and_click_by_template(self.__config['TEMPLATES']['back_button'])
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 

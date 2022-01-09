@@ -89,10 +89,10 @@ class ImageHelper:
         template = cv2.imread(template_path)    
 
         while result == None and duration < timeout:
-            time.sleep(1)
-            duration += 1
+            time.sleep(1)           
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.find_exact_match_position(website_picture, template, should_grayscale, confidence_level)  
+            duration += 1
 
         if result == None and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")
@@ -106,10 +106,10 @@ class ImageHelper:
         template = cv2.imread(template_path)    
 
         while result == None and duration < timeout:
-            time.sleep(1)
-            duration += 1
+            time.sleep(1)            
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
+            duration += 1
 
         if result == None and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")

@@ -11,17 +11,17 @@ from crypto_automation.app.shared.image_processing_helper import ImageHelper
 from crypto_automation.app.shared.thread_helper import Job
 from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
 import crypto_automation.app.shared.log_helper as log 
-from crypto_automation.app.shared.numbers_helper import random_waitable_number, random_number_between
+from crypto_automation.app.shared.numbers_helper import random_number_between
 
 class GameStatusManager:
     def __init__(self, config: ConfigParser, password_access: str, chat_bot: ChatBotManager , lock: threading.Lock = None):
         self.__config = config  
         self.__password_access = password_access
-        self.__chat_bot = chat_bot              
+        self.__chat_bot = chat_bot  
+        self.__lock = threading.Lock() if lock == None else lock                
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
-        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)  
-        self.__lock = threading.Lock() if lock == None else lock    
+        self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)         
         self.__error_count = 0
         self.__error_time = None
         self.__idle = False
@@ -73,6 +73,13 @@ class GameStatusManager:
         self.__captcha_solver.get_game_window()
 
 
+    def __security_check(self):
+        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
+                                                                [], self.__config['TEMPLATES']['url_validate'], 
+                                                                    self.__config['TIMEOUT'].getint('imagematching') , 
+                                                                    0.02, True)
+
+
     def __enter_game(self):
         self.__find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
@@ -109,19 +116,14 @@ class GameStatusManager:
 
 
     def __handle_unexpected_status(self):
-        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['newmap_button'], 2, 0.05)
+        newmap = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['newmap_button'], 1, 0.05)
         if newmap:
             log.warning(f"entering new map in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
-
+            time.sleep(15)
             log.image(self.__windows_action_helper, self.__chat_bot)
 
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['newmap_button'])
 
-            time.sleep(5)
-
-            log.image(self.__windows_action_helper, self.__chat_bot)
-
-        idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 2, 0.02)
+        idle = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['idle_error_message'], 1, 0.02)
         if idle:
             log.error(f"Detected idle message in {self.__config['WEBDRIVER']['name']}, pausing automation until its time to put the heroes to work again.", self.__chat_bot)
             self.__status_handling.pause()
@@ -130,14 +132,14 @@ class GameStatusManager:
             self.__idle = True
             return
 
-        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 2, 0.05)
+        error = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['error_message'], 1, 0.05)
         if error:
             log.error(f"Error on game in {self.__config['WEBDRIVER']['name']}, refreshing page.", self.__chat_bot)
             log.image(self.__windows_action_helper, self.__chat_bot)
             self.__check_possible_server_error()
             self.__restart_game()
 
-        expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05)
+        expected_screen = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 1, 0.05)
         if expected_screen == None:
             log.error(f"game on wrong page in {self.__config['WEBDRIVER']['name']}, refreshing page.", self.__chat_bot)
             log.image(self.__windows_action_helper, self.__chat_bot)
@@ -178,50 +180,18 @@ class GameStatusManager:
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['heroes_icon'])
 
-        timeout = self.__config['TIMEOUT'].getint('imagematching')
-
-        # if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], timeout, 0.005, should_grayscale=False)
-        #    or self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], timeout, 0.005, should_grayscale=False)):
-        #     log.image(self.__windows_action_helper, self.__chat_bot)
-        #     self.__click_all_work_buttons()
         if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['all_button'], 2, 0.05, should_grayscale=False)):
             self.__find_and_click_by_template(self.__config['TEMPLATES']['all_button'])
-
+            log.image(self.__windows_action_helper, self.__chat_bot)
 
         self.__find_and_click_by_template(self.__config['TEMPLATES']['exit_button'], 0.05, should_grayscale=False)
+
         self.__find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
+
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['map_screen_validator'], 2, 0.05, True)
 
 
 # region Util
-    def __click_all_work_buttons(self):
-        if(self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['all_button'], 2, 0.05, should_grayscale=False)):
-            self.__find_and_click_by_template(self.__config['TEMPLATES']['all_button'])
-        
-        else:
-            result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 2, 0.05, should_grayscale=False)
-
-            count = 0
-            while len(result_match) == 0 and count <= 5:
-                result_active_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_active_button'], 25, 0.002, should_grayscale=False)
-                if result_active_match:
-                    x_offset = -50
-                    last_active_button_x, last_active_button_y = result_active_match[len(result_active_match)-1]
-                    self.__windows_action_helper.click_and_scroll_down(last_active_button_x + x_offset, last_active_button_y)
-                    result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
-                count += 1
-
-            count = 0
-            while len(result_match) > 0 and count <= 5:
-                for (x, y) in result_match:
-                    self.__windows_action_helper.click_on(x, y)
-                    time.sleep(random_waitable_number(self.__config))
-                last_button_x, last_button_y = result_match[len(result_match)-1]
-                self.__windows_action_helper.click_and_scroll_down( last_button_x, last_button_y)
-                result_match = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['work_button'], 25, 0.05, should_grayscale=False)
-                count += 1
-
-
     def __find_and_click_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
 
@@ -238,13 +208,6 @@ class GameStatusManager:
 
         if result_match:
             self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)
-
-
-    def __security_check(self):
-        self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, 
-                                                                [], self.__config['TEMPLATES']['url_validate'], 
-                                                                    self.__config['TIMEOUT'].getint('imagematching') , 
-                                                                    0.02, True)
 
 
     def __thread_safe(self, method, positional_arguments = None, keyword_arguments = None):

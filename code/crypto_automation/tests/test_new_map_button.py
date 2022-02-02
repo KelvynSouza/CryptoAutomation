@@ -43,7 +43,7 @@ config_filename = "D:\Git\CryptoOcrAutomation\code\crypto_automation\settings.in
 config = configparser.ConfigParser(
     interpolation=configparser.ExtendedInterpolation())
 config.read(config_filename)
-config['TEMPLATES']['game_images_path'] = '..\\resources\\images\\game'
+config['TEMPLATES']['bomb_images_path'] = '..\\resources\\images\\game'
 
 create_log_folder(config['COMMON']['log_path'],
                   config['COMMON']['screenshots_path'])

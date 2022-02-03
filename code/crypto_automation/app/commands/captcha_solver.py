@@ -1,7 +1,7 @@
 import configparser
 import cv2
 import numpy as np
-from crypto_automation.app.commands.chat_bot_manager import ChatBotManager
+from crypto_automation.app.commands.chat_bot_command import ChatBotCommand
 import crypto_automation.app.shared.log_helper as log 
 from crypto_automation.app.shared.image_processing_helper import ImageHelper
 from crypto_automation.app.shared.numbers_helper import random_number_between
@@ -10,7 +10,7 @@ from crypto_automation.app.shared.windows_action_helper import WindowsActionsHel
 
 
 class CaptchaSolver:
-    def __init__(self, config: configparser, image_helper: ImageHelper, action_helper: WindowsActionsHelper, chat_bot: ChatBotManager):
+    def __init__(self, config: configparser, image_helper: ImageHelper, action_helper: WindowsActionsHelper, chat_bot: ChatBotCommand):
         self.__config = config
         self.__image_helper = image_helper
         self.__windows_action_helper = action_helper        

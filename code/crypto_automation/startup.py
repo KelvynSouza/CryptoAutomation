@@ -5,10 +5,11 @@ import traceback
 import keyring
 import pickle
 
-from app.commands.game_status_manager import GameStatusManager
+from app.commands.bomb_game_status_command import BombGameStatusCommand
 from app.shared.os_helper import create_folder
 from app.shared.windows_action_helper import WindowsActionsHelper
-from app.commands.chat_bot_manager import ChatBotManager
+from app.commands.chat_bot_command import ChatBotCommand
+from crypto_automation.app.controller.game_starter_manager import GameStarterManager
 import crypto_automation.app.shared.log_helper as log 
 
 def run():   
@@ -19,7 +20,9 @@ def run():
     if config['CHROME_DRIVER'].getboolean('use_browser'):
         start_browser('chrome', lock)  
     if config['EDGE_DRIVER'].getboolean('use_browser'):  
-        start_browser('edge', lock)    
+        start_browser('edge', lock)  
+    if config['MOZILLA_DRIVER'].getboolean('use_browser'):  
+        start_browser('mozilla', lock)  
     
 
 def secure_passwords():
@@ -37,7 +40,7 @@ def start_browser(browser: str, lock: threading.Lock):
     try:
         config['TEMPLATES']['browser_images_path'] = config['TEMPLATES'][f'{browser}_images_path'] 
         config['WEBDRIVER'] = config[f'{browser.upper()}_DRIVER']
-        game_watcher = GameStatusManager(copy_config(config), f"secret_password_{browser}", chat, lock)
+        game_watcher = GameStarterManager(browser, copy_config(config), f"secret_password_{browser}", chat, lock)
         game_watcher.start_game()
 
     except BaseException:
@@ -73,7 +76,7 @@ logging.basicConfig(format='[%(asctime)s] %(message)s', filename=config['COMMON'
 
 chat = None
 if config['TELEGRAM'].getboolean('integration'):
-    chat = ChatBotManager(config)
+    chat = ChatBotCommand(config)
     chat.start()
 
 error = 0

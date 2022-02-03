@@ -6,7 +6,7 @@ from telebot import util
 from crypto_automation.app.shared.thread_helper import Job
 
 
-class ChatBotManager:
+class ChatBotCommand:
     def __init__(self, config: configparser):
         self.__config = config
         self.__chat_id = self.__config['TELEGRAM']['chat_id']

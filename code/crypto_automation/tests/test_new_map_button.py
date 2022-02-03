@@ -1,7 +1,7 @@
 import configparser
 import threading
 import time
-from app.commands.game_status_manager import GameStatusManager
+from app.commands.bomb_game_status_command import BombGameStatusCommand
 from app.shared.image_processing_helper import ImageHelper
 from app.shared.numbers_helper import random_waitable_number
 from app.shared.os_helper import create_log_folder

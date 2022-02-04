@@ -26,6 +26,6 @@ class ChatBotCommand:
             self.__bot.send_photo(self.__chat_id, image_to_send, disable_notification=True)
 
     def start(self):
-        pooling = Job(self.__bot.infinity_polling, 0, True)
+        pooling = Job(self.__bot.infinity_polling, 0, True, True)
         pooling.start()
         

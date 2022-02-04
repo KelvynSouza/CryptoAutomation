@@ -35,10 +35,10 @@ class BombGameStatusCommand:
                 log.image(self.__windows_action_helper, self.__chat_bot)
                 self.__commands_helper.check_possible_server_error()
 
-        self.__status_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_error'), False, self.__handle_unexpected_status)
-        self.__connection_error_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, self.__validate_connection)
-        self.__hero_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, self.__verify_and_handle_heroes_status)
-        self.__heroes_position_restarter = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('restart_heroes_position'), False, self.__restart_heroes_position)
+        self.__status_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_error'), False, True, self.__handle_unexpected_status)
+        self.__connection_error_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_zero_coins'), False, True, self.__validate_connection)
+        self.__hero_handling = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('verify_heroes_status'), False, True, self.__verify_and_handle_heroes_status)
+        self.__heroes_position_restarter = Job(self.__commands_helper.thread_safe, self.__config['RETRY'].getint('restart_heroes_position'), False, True, self.__restart_heroes_position)
 
         self.__status_handling.start()
         self.__connection_error_handling.start()

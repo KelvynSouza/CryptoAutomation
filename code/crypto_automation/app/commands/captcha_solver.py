@@ -199,7 +199,7 @@ class CaptchaSolver:
         captcha_x, captcha_y, captcha_w, captcha_h = self.__captcha_contours
         
         signal = True
-        watch_captcha_reveal = Job(self.watch_and_treat_captcha_screen, 0, True)
+        watch_captcha_reveal = Job(self.watch_and_treat_captcha_screen, 0, True, True)
         watch_captcha_reveal.start()
 
         x_start = game_x+captcha_x

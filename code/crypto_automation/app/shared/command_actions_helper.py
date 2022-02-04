@@ -28,9 +28,10 @@ class CommandActionsHelper:
         if result_match:
             self.__windows_action_helper.click_on(result_match.x, result_match.y)
 
-        captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 2, 0.05, False, False)
-        if captcha_match:
-            self.__captcha_solver.solve_captcha()
+        if self.__captcha_solver:
+            captcha_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['robot_message'], 2, 0.05, False, False)
+            if captcha_match:
+                self.__captcha_solver.solve_captcha()
             
 
     def find_and_write_by_template(self, template_path, to_write, confidence_level=0.05, should_thrown=True):

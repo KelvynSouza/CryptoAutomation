@@ -29,8 +29,10 @@ def secure_passwords():
     if config['SECURITY'].getboolean('ispasswordsecured') == False:
         keyring.set_password(config['SECURITY']['serviceid'], "secret_password_chrome", config['LOGIN']['password_chrome'])
         keyring.set_password(config['SECURITY']['serviceid'], "secret_password_edge", config['LOGIN']['password_edge'])
+        keyring.set_password(config['SECURITY']['serviceid'], "secret_password_mozilla", config['LOGIN']['password_mozilla'])
         config['LOGIN']['password_chrome'] = "Secured"
         config['LOGIN']['password_edge'] = "Secured"
+        config['LOGIN']['password_mozilla'] = "Secured"
         config['SECURITY']['ispasswordsecured'] = "True"
         with open(config['COMMON']['settings_name'], 'w') as configfile:
             config.write(configfile)

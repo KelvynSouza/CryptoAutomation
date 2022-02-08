@@ -1,4 +1,4 @@
-from ast import Str
+from ast import Return, Str
 import threading
 import time
 import traceback
@@ -123,7 +123,14 @@ class LunaGameStatusCommand:
             team_members = team.split(",")
             total_heroes_played += len(team_members)
 
-            self.__uncheck_all_heroes()                           
+            self.__uncheck_all_heroes() 
+
+            empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 0.1)
+            if len(empty_heroes) == self.__config['LUNA_CONFIG'].getint('number_of_heroes'):
+                log.error(f"There are no heroes with energy to spend!", self.__chat_bot)
+                self.__close_browser()
+                return
+
             self.__check_team_heroes(team_members)
 
             log.warning(f"Hunting boss with team {','.join(team_members)}", self.__chat_bot)
@@ -135,7 +142,8 @@ class LunaGameStatusCommand:
                 tries += 1
 
                 empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 5, 0.1)
-                if len(empty_heroes) == total_heroes_played:
+                if len(empty_heroes) == total_heroes_played:                    
+                    log.image(self.__windows_action_helper, self.__chat_bot) 
                     break
                 elif tries > 5:
                     log.error(f"Error Trying to play with heroes in Luna Rush, tries exceeded limit.", self.__chat_bot)

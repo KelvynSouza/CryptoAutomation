@@ -18,6 +18,7 @@ class GameStarterManager:
                 game_watcher = LunaGameStatusCommand(self.__config, self.__password_access, self.__chat_bot, self.__lock)
                 game_watcher.start_game()
         else:
-            game_watcher = BombGameStatusCommand(self.__config, self.__password_access, self.__chat_bot, self.__lock)
-            game_watcher.start_game()
+            if self.__config['BOMB_CONFIG'].getboolean('enabled') == True:
+                game_watcher = BombGameStatusCommand(self.__config, self.__password_access, self.__chat_bot, self.__lock)
+                game_watcher.start_game()
 

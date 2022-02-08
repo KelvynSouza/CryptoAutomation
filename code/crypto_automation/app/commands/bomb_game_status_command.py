@@ -61,7 +61,7 @@ class BombGameStatusCommand:
     def __open_game_website(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['incognito_icon'], 0.05)
 
-        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['COMMON']['bomb_crypto_url'], 0.05)
+        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['BOMB_CONFIG']['bomb_crypto_url'], 0.05)
 
         self.__windows_action_helper.press_special_buttons("enter")
 

@@ -135,17 +135,18 @@ class WindowsActionsHelper:
         return pyautogui.onScreen(x, y)
 
 
-    def open_and_maximise_front_window(self, program_path, image_validation_path, *arguments):   
+    def open_and_maximise_front_window(self, program_path, image_validation_path = None, *arguments):   
         args = [program_path]
         args.extend(arguments)
         startupinf = subprocess.STARTUPINFO()
         # {"hide":0, "normal":1, "minimized":2,"maximized":3}
         startupinf.wShowWindow = 3 
-        test = subprocess.Popen(args, startupinfo=startupinf)          
-        self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
-                                                [], image_validation_path, 
-                                                    self.__config['TIMEOUT'].getint('imagematching'), 
-                                                    0.05, True)       
+        test = subprocess.Popen(args, startupinfo=startupinf)  
+        if image_validation_path != None:
+            self.__image_helper.wait_until_match_is_found(self.take_screenshot, 
+                                                    [], image_validation_path, 
+                                                        self.__config['TIMEOUT'].getint('imagematching'), 
+                                                        0.05, True)       
 
 
     def process_exists(self, process_name): 

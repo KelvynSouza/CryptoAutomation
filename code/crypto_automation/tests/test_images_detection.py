@@ -29,14 +29,14 @@ def take_screenshot():
 
 image_helper = ImageHelper()
 
-image_path = "../resources/images/test/luna/heroes_empty_energy_screen.png"
-template_path = "../resources/images/luna/low_energy_bar.png"
+image_path = "../resources/images/test/luna/heroes_active_empty_energy_screen.png"
+template_path = "../resources/images/luna/low_energy_bar_checked.png"
 
 image = cv2.imread(image_path)
 
 template = cv2.imread(template_path)
 
-points = image_helper.find_exact_matches_position(image, template, False, 0.2)
+points = image_helper.find_exact_matches_position(image, template, False, 0.1)
 
 for (x,y) in points:
     cv2.circle(image, (x, y), 5, (255,0,0), 3)

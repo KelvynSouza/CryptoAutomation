@@ -4,6 +4,7 @@ import threading
 import traceback
 import time
 from win32con import *
+from crypto_automation.app.commands.chat_bot_command import ChatBotCommand
 import crypto_automation.app.shared.log_helper as log 
 from crypto_automation.app.commands.captcha_solver import CaptchaSolver
 from crypto_automation.app.shared.image_processing_helper import ImageHelper
@@ -12,7 +13,7 @@ from crypto_automation.app.shared.windows_action_helper import WindowsActionsHel
 
 
 class CommandActionsHelper:
-    def __init__(self, config: ConfigParser, action_helper: WindowsActionsHelper, image_helper: ImageHelper, lock: threading.Lock, captcha_solver: CaptchaSolver, restart_method):
+    def __init__(self, config: ConfigParser, action_helper: WindowsActionsHelper, image_helper: ImageHelper, lock: threading.Lock, captcha_solver: CaptchaSolver, restart_method,  chat_bot: ChatBotCommand ,):
         self.__config = config
         self.__image_helper = image_helper
         self.__windows_action_helper = action_helper
@@ -21,6 +22,7 @@ class CommandActionsHelper:
         self.__error_count = 0
         self.__error_time = None
         self.__restart_game = restart_method
+        self.__chat_bot = chat_bot
 
     def find_and_click_by_template(self, template_path, confidence_level=0.1, should_thrown=True, should_grayscale=True):
         result_match = self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], template_path, self.__config['TIMEOUT'].getint('imagematching'), confidence_level, should_thrown, should_grayscale)
@@ -41,11 +43,12 @@ class CommandActionsHelper:
             self.__windows_action_helper.write_at(result_match.x, result_match.y, to_write)
 
 
-    def thread_safe(self, method, positional_arguments = None, keyword_arguments = None):
+    def thread_safe(self, method, bring_foreground = True, positional_arguments = None, keyword_arguments = None):
         error = False 
         with self.__lock:  
-            self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
-            try:               
+            if bring_foreground:
+                self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
+            try:   
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:
                 log.error(f"Error in {self.__config['WEBDRIVER']['name']}:" + traceback.format_exc(), self.__chat_bot)

@@ -21,11 +21,11 @@ class LunaGameStatusCommand:
         self.__lock = threading.Lock() if lock == None else lock                
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)               
-        self.__commands_helper = CommandActionsHelper(config, self.__windows_action_helper, self.__image_helper, self.__lock, None, self.__restart_game)
+        self.__commands_helper = CommandActionsHelper(config, self.__windows_action_helper, self.__image_helper, self.__lock, None, self.__restart_game, self.__chat_bot)
         
 
     def start_game(self):   
-        self.__luna_thread = Job(self.__commands_helper.thread_safe, self.__config['LUNA_CONFIG'].getint('hunt_timer'), False, False, self.__hunt_bosses)
+        self.__luna_thread = Job(self.__commands_helper.thread_safe, self.__config['LUNA_CONFIG'].getint('hunt_timer'), False, False, self.__hunt_bosses, False)
 
         self.__luna_thread.start()
 
@@ -37,6 +37,8 @@ class LunaGameStatusCommand:
                                                                     self.__config['TEMPLATES']['incognito_icon'],
                                                                     self.__config["WEBDRIVER"]["browser_args"])
 
+        self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name'])
+        
         self.__open_game_website()
 
         self.__security_check()
@@ -47,7 +49,7 @@ class LunaGameStatusCommand:
     def __open_game_website(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['incognito_icon'], 0.05)
 
-        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['COMMON']['luna_url'], 0.05)
+        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['url_input'], self.__config['LUNA_CONFIG']['luna_url'], 0.05)
 
         self.__windows_action_helper.press_special_buttons("enter")
 
@@ -72,6 +74,8 @@ class LunaGameStatusCommand:
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
+
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_connect_wallet_button'], 0.02)
 
         if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 20, 0.05):
             self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
@@ -127,7 +131,7 @@ class LunaGameStatusCommand:
             while True: 
                 tries += 1
 
-                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['low_energy_bar_checked'], 5, 0.02)
+                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 5, 0.1)
                 if len(empty_heroes) == total_heroes_played:
                     break
                 elif tries > 5:
@@ -165,7 +169,7 @@ class LunaGameStatusCommand:
 
         
     def __uncheck_all_heroes(self):
-        for i in range(1, self.__config['LUNA_CONFIG'].getint('number_of_heroes')):
+        for i in range(1, self.__config['LUNA_CONFIG'].getint('number_of_heroes')+1):
             checked_hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\checked_hero_{i}.png"
             hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\hero_{i}.png"
 

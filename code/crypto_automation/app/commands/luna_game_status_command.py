@@ -29,7 +29,7 @@ class LunaGameStatusCommand:
 
         self.__luna_thread.start()
 
-        log.warning(f"Automation from {self.__config['WEBDRIVER']['name']} started succefully.", self.__chat_bot)
+        log.warning(f"Luna Rush Automation started succefully on {self.__config['WEBDRIVER']['name']}.", self.__chat_bot)
         
 
     def __open_chrome_and_goto_game(self):
@@ -97,9 +97,12 @@ class LunaGameStatusCommand:
 
 
     def __hunt_bosses(self):
+        log.warning(f"Starting boss hunt fight in Luna Rush.", self.__chat_bot)
         self.__open_chrome_and_goto_game()
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_button'])
+
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_1'])
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                      [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
@@ -107,44 +110,58 @@ class LunaGameStatusCommand:
                                                          'imagematching'),
                                                      0.05, True)        
 
-        total_played_heroes = 0
         teams = self.__config['LUNA_CONFIG']['team_members'].split('|')
+        total_heroes_played = 0
         for team in teams:
-            total_played_heroes += len(team)
             team_members = team.split(",")
+            total_heroes_played += len(team_members)
 
             self.__uncheck_all_heroes()                           
             self.__check_team_heroes(team_members)
 
-            playing_team = True
-            tries = 0
-            while(playing_team): 
-                tries += 1
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_hunt_boss_button'], confidence_level=0.02)
+            log.warning(f"Hunting boss with team {','.join(team_members)}", self.__chat_bot)
+            log.image(self.__windows_action_helper, self.__chat_bot)   
 
+            
+            tries = 0
+            while True: 
+                tries += 1
+
+                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['low_energy_bar_checked'], 5, 0.02)
+                if len(empty_heroes) == total_heroes_played:
+                    break
+                elif tries > 5:
+                    log.error(f"Error Trying to play with heroes in Luna Rush, tries exceeded limit.", self.__chat_bot)
+                    log.image(self.__windows_action_helper, self.__chat_bot)                    
+                    break
+
+                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_hunt_boss_button'], confidence_level=0.02)
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_touch_to_start_phrase'])
 
                 time.sleep(30)
 
                 if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_defeat_message'], 20, 0.05):
+                    log.warning(f"Team defeated!", self.__chat_bot)
+                    log.image(self.__windows_action_helper, self.__chat_bot)   
                     self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_touch_to_continue_phrase'])
-                else:
+                elif self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_victory_message'], 20, 0.05):
+                    log.warning(f"Team achieved victory!", self.__chat_bot)
+                    log.image(self.__windows_action_helper, self.__chat_bot)   
                     self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_open_chest_button'])
                     self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_touch_to_continue_phrase'])
+                else:
+                    log.warning(f"Error, battle result not found!", self.__chat_bot)
+                    log.image(self.__windows_action_helper, self.__chat_bot) 
+                    raise Exception("Battle result not found!") 
                 
-                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 0.02)
-                if len(empty_heroes) == total_played_heroes:
-                    playing_team = False
-                    break
+                self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
+                                                     [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
+                                                     self.__config['TIMEOUT'].getint(
+                                                         'imagematching'),
+                                                     0.05, True)     
 
-                if tries > 5:
-                    playing_team = False
-                    log.error(f"Error Trying to play with heroes in Luna Rush.", self.__chat_bot)
-                    break
         self.__close_browser()
-                
-
-            
+        log.warning(f"Boss hunt fight endeed succefully", self.__chat_bot)
 
         
     def __uncheck_all_heroes(self):
@@ -154,7 +171,7 @@ class LunaGameStatusCommand:
 
             if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 3, 0.02):
                 self.__commands_helper.find_and_click_by_template(checked_hero_image_path)
-                self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], hero_image_path, 10, 0.02, True)
+                self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], hero_image_path, 15, 0.02, True)
 
 
     def __check_team_heroes(self, team_members: list[str]):
@@ -163,7 +180,7 @@ class LunaGameStatusCommand:
             hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\hero_{i}.png"
             
             self.__commands_helper.find_and_click_by_template(hero_image_path)
-            self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 10, 0.05, True)
+            self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 15, 0.05, True)
 
 
 # region Util

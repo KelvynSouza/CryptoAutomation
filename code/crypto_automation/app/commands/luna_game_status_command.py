@@ -106,7 +106,10 @@ class LunaGameStatusCommand:
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_button'])
 
-        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_1'])
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_boss_1'], 10):
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_1'], should_grayscale=False)
+        else:
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_2'], should_grayscale=False)
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                      [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
@@ -152,12 +155,17 @@ class LunaGameStatusCommand:
                     log.warning(f"Team achieved victory!", self.__chat_bot)
                     log.image(self.__windows_action_helper, self.__chat_bot)   
                     self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_open_chest_button'])
-                    self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_touch_to_continue_phrase'])
+                    self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_touch_to_continue_phrase'], 0.05)
+
+                    if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_boss_2'], 10):
+                        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_2'], should_grayscale=False)
                 else:
                     log.warning(f"Error, battle result not found!", self.__chat_bot)
                     log.image(self.__windows_action_helper, self.__chat_bot) 
                     raise Exception("Battle result not found!") 
                 
+
+
                 self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                      [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
                                                      self.__config['TIMEOUT'].getint(

@@ -82,6 +82,9 @@ class BombGameStatusCommand:
     def __enter_game(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 20, 0.05):
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending']) 
+            
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
 
         self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
@@ -89,6 +92,9 @@ class BombGameStatusCommand:
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['bnb_symbol'], 20, 0.05):
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+            
         if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 20, 0.05):
             self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
            

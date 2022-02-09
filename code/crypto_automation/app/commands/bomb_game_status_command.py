@@ -21,7 +21,7 @@ class BombGameStatusCommand:
         self.__image_helper = ImageHelper()
         self.__windows_action_helper = WindowsActionsHelper(config, self.__image_helper)        
         self.__captcha_solver = CaptchaSolver(config, self.__image_helper, self.__windows_action_helper, self.__chat_bot)         
-        self.__commands_helper = CommandActionsHelper(config, self.__windows_action_helper, self.__image_helper, self.__lock, self.__captcha_solver, self.__restart_game)
+        self.__commands_helper = CommandActionsHelper(config, self.__windows_action_helper, self.__image_helper, self.__lock, self.__captcha_solver, self.__restart_game, self.__chat_bot)
         self.__idle = False
         
 

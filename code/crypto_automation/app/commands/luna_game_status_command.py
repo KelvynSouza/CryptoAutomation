@@ -117,11 +117,9 @@ class LunaGameStatusCommand:
                                                          'imagematching'),
                                                      0.05, True)        
 
-        teams = self.__config['LUNA_CONFIG']['team_members'].split('|')
-        total_heroes_played = 0
+        teams = self.__config['LUNA_CONFIG']['team_members'].split('|')        
         for team in teams:
-            team_members = team.split(",")
-            total_heroes_played += len(team_members)
+            team_members = team.split(",")           
 
             self.__uncheck_all_heroes() 
 
@@ -142,7 +140,8 @@ class LunaGameStatusCommand:
                 tries += 1
 
                 empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 5, 0.1)
-                if len(empty_heroes) == total_heroes_played:                    
+                if len(empty_heroes) == len(team_members): 
+                    log.warning(f"All energy spend from team {','.join(team_members)}", self.__chat_bot)                   
                     log.image(self.__windows_action_helper, self.__chat_bot) 
                     break
                 elif tries > 5:

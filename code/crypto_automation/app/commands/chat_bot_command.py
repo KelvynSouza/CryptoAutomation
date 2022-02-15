@@ -6,7 +6,7 @@ from telebot import util
 from crypto_automation.app.shared.thread_helper import Job
 
 
-class ChatBotManager:
+class ChatBotCommand:
     def __init__(self, config: configparser):
         self.__config = config
         self.__chat_id = self.__config['TELEGRAM']['chat_id']
@@ -26,6 +26,6 @@ class ChatBotManager:
             self.__bot.send_photo(self.__chat_id, image_to_send, disable_notification=True)
 
     def start(self):
-        pooling = Job(self.__bot.infinity_polling, 0, True)
+        pooling = Job(self.__bot.infinity_polling, 0, True, True)
         pooling.start()
         

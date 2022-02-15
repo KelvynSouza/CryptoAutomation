@@ -58,7 +58,7 @@ config_filename = "..\\settings.ini"
 config = configparser.ConfigParser(
     interpolation=configparser.ExtendedInterpolation())
 config.read(config_filename)
-config['TEMPLATES']['game_images_path'] = '..\\resources\\images\\game'
+config['TEMPLATES']['bomb_images_path'] = '..\\resources\\images\\game'
 config['TEMPLATES']['captcha_image_path'] = '..\\resources\\images\\game\\captcha'
 config['TEMPLATES']['captcha_simple_image_path'] = '..\\resources\\images\\game\\captcha\\simple'
 config['TEMPLATES']['captcha_complex_image_path'] = '..\\resources\\images\\game\\captcha\\complex'

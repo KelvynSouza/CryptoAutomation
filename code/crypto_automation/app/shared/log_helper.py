@@ -1,9 +1,9 @@
 import logging
-from crypto_automation.app.commands.chat_bot_manager import ChatBotManager
+from crypto_automation.app.commands.chat_bot_command import ChatBotCommand
 from crypto_automation.app.shared.windows_action_helper import WindowsActionsHelper
 
 
-def error(message, chat_bot: ChatBotManager = None):
+def error(message, chat_bot: ChatBotCommand = None):
     logging.error(message)
     if chat_bot:
         try:
@@ -12,7 +12,7 @@ def error(message, chat_bot: ChatBotManager = None):
             pass  
 
 
-def warning(message, chat_bot: ChatBotManager = None):
+def warning(message, chat_bot: ChatBotCommand = None):
     logging.warning(message)
     if chat_bot:
         try:
@@ -21,7 +21,7 @@ def warning(message, chat_bot: ChatBotManager = None):
             pass 
 
 
-def image(windows_actions: WindowsActionsHelper, chat_bot: ChatBotManager = None):
+def image(windows_actions: WindowsActionsHelper, chat_bot: ChatBotCommand = None):
     windows_actions.save_screenshot_log()
     if chat_bot:
         try:

@@ -4,7 +4,7 @@ from crypto_automation.app.shared.numbers_helper import random_number_between
 
 
 class Job(threading.Thread):
-    def __init__(self, t, retrytime, run_once=False, *args, **kwargs):
+    def __init__(self, t, retrytime, run_once=False, random_timer=False, *args, **kwargs):
         super(Job, self).__init__()
         self.__target = t  
         self.__args = args
@@ -12,6 +12,7 @@ class Job(threading.Thread):
 
         self.__run_once = run_once
         self.__retrytime = retrytime
+        self.__random_timer = random_timer
         self.__flag = threading.Event() # The flag used to pause the thread
         self.__flag.set() # Set to True
         self.__running = threading.Event() # Used to stop the thread identification
@@ -25,7 +26,8 @@ class Job(threading.Thread):
             else:
                 raise Exception("Method not found for thread!")
                 
-            time.sleep(self.__retrytime*random_number_between(1.0, 2))
+            random_number = random_number_between(1.0, 2) if self.__random_timer == True else 1
+            time.sleep(self.__retrytime*random_number)
 
             self.__flag.wait() # return immediately when it is True, block until the internal flag is True when it is False
 

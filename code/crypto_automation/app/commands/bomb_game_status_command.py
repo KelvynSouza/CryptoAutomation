@@ -82,7 +82,7 @@ class BombGameStatusCommand:
     def __enter_game(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 20, 0.05):
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 5, 0.05):
             self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending']) 
             
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
@@ -92,16 +92,18 @@ class BombGameStatusCommand:
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['bnb_symbol'], 20, 0.05):
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['bnb_symbol'], 10, 0.05):
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['half_connect_wallet_button'])
             
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 20, 0.05):
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
             self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
            
-        elif self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 20, 0.05):
+        elif self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 10, 0.05):
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
             
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+
+                self.__windows_action_helper.press_special_buttons("esc")
         else:
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
 

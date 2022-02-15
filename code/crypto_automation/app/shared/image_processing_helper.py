@@ -99,6 +99,7 @@ class ImageHelper:
             result = self.find_exact_match_position(website_picture, template, should_grayscale, confidence_level)
             current_time = time.time() 
             duration = current_time - start_time
+            time.sleep(0.1)
             
 
         if result == None and should_throw_exception == True:
@@ -118,6 +119,7 @@ class ImageHelper:
             result = self.find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
             current_time = time.time() 
             duration = current_time - start_time
+            time.sleep(0.1)
 
         if result == None and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")

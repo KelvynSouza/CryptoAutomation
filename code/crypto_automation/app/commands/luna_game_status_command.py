@@ -41,7 +41,7 @@ class LunaGameStatusCommand:
         
         self.__open_game_website()
 
-        self.__security_check()
+        #self.__security_check()
 
         self.__enter_game()
 
@@ -68,12 +68,17 @@ class LunaGameStatusCommand:
     def __enter_game(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_connect_wallet_button'])
 
+        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 5, 0.05):
+            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending']) 
+
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
 
         self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
+
+        self.__windows_action_helper.press_special_buttons("esc")
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_connect_wallet_button'], 0.02)
 
@@ -84,10 +89,12 @@ class LunaGameStatusCommand:
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
             
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+
+                self.__windows_action_helper.press_special_buttons("esc")
         else:
                 self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
 
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_connect_wallet_button'])
 
                 time.sleep(5)
 
@@ -204,10 +211,14 @@ class LunaGameStatusCommand:
 
 # region Util
     def __restart_game(self):
-        log.warning(f"Restarting automation in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
-        self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['exe_name'])
-        self.__open_chrome_and_goto_game()
-        log.warning(f"Restarted successfully in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
+        try:
+            log.warning(f"Restarting automation in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
+            self.__close_browser()
+            self.__open_chrome_and_goto_game()
+            log.warning(f"Restarted successfully in {self.__config['WEBDRIVER']['name']}", self.__chat_bot)
+        except BaseException as ex:
+            self.__close_browser()
+            self.__commands_helper.check_possible_server_error()
 
     def __close_browser(self):
         log.warning(f"Closing browser {self.__config['WEBDRIVER']['name']} for Luna Rush", self.__chat_bot)

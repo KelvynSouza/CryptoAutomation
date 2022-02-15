@@ -162,7 +162,7 @@ class WindowsActionsHelper:
        
 
     def kill_process(self, process_name):
-        subprocess.call("taskkill /im "+process_name+" /F")
+        subprocess.call("taskkill /im "+process_name+" /F /T")
         
 
     def bring_window_foreground(self, name):        

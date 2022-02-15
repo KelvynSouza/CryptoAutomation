@@ -13,7 +13,7 @@ class GameStarterManager:
         self.__lock = threading.Lock() if lock == None else lock
 
     def start_game(self):
-        if self.__browser.upper() == "CHROME":
+        if self.__browser.upper() == "MOZILLA":
             if self.__config['LUNA_CONFIG'].getboolean('enabled') == True:
                 game_watcher = LunaGameStatusCommand(self.__config, self.__password_access, self.__chat_bot, self.__lock)
                 game_watcher.start_game()

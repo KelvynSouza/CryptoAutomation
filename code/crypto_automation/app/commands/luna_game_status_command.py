@@ -108,6 +108,8 @@ class LunaGameStatusCommand:
 
 
     def __hunt_bosses(self):
+        self.__check_if_browser_is_open()
+
         log.warning(f"Starting boss hunt fight in Luna Rush.", self.__chat_bot)
         self.__open_chrome_and_goto_game()
 
@@ -139,9 +141,8 @@ class LunaGameStatusCommand:
             self.__check_team_heroes(team_members)
 
             log.warning(f"Hunting boss with team {','.join(team_members)}", self.__chat_bot)
-            log.image(self.__windows_action_helper, self.__chat_bot)   
-
-            
+            log.image(self.__windows_action_helper, self.__chat_bot)  
+                        
             tries = 0
             while True: 
                 tries += 1
@@ -176,16 +177,13 @@ class LunaGameStatusCommand:
                 else:
                     log.warning(f"Error, battle result not found!", self.__chat_bot)
                     log.image(self.__windows_action_helper, self.__chat_bot) 
-                    raise Exception("Battle result not found!") 
-                
-
+                    raise Exception("Battle result not found!")
 
                 self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                      [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
                                                      self.__config['TIMEOUT'].getint(
                                                          'imagematching'),
                                                      0.05, True)     
-
         self.__close_browser()
         log.warning(f"Boss hunt fight endeed succefully", self.__chat_bot)
 
@@ -195,7 +193,7 @@ class LunaGameStatusCommand:
             checked_hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\checked_hero_{i}.png"
             hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\hero_{i}.png"
 
-            if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 3, 0.02):
+            if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 5, 0.02):
                 self.__commands_helper.find_and_click_by_template(checked_hero_image_path)
                 self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], hero_image_path, 15, 0.02, True)
 
@@ -219,6 +217,15 @@ class LunaGameStatusCommand:
         except BaseException as ex:
             self.__close_browser()
             self.__commands_helper.check_possible_server_error()
+
+
+    def __check_if_browser_is_open(self):
+        log.warning(f"Checking if browser  {self.__config['WEBDRIVER']['name']} is already open for Luna Rush", self.__chat_bot)
+        is_browser_open = self.__windows_action_helper.process_exists(self.__config['WEBDRIVER']['exe_name'])
+        if is_browser_open:
+            log.warning(f"Closing browser {self.__config['WEBDRIVER']['name']} for Luna Rush", self.__chat_bot)
+            self.__windows_action_helper.kill_process(self.__config['WEBDRIVER']['exe_name'])
+
 
     def __close_browser(self):
         log.warning(f"Closing browser {self.__config['WEBDRIVER']['name']} for Luna Rush", self.__chat_bot)

@@ -45,10 +45,11 @@ class CommandActionsHelper:
 
     def thread_safe(self, method, bring_foreground = True, positional_arguments = None, keyword_arguments = None):
         error = False 
-        with self.__lock:  
-            if bring_foreground:
-                self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
-            try:   
+        with self.__lock: 
+            try: 
+                if bring_foreground:
+                    self.__windows_action_helper.bring_window_foreground(self.__config['WEBDRIVER']['name']) 
+               
                 self.__execute_method(method, positional_arguments, keyword_arguments)
             except BaseException as ex:
                 log.error(f"Error in {self.__config['WEBDRIVER']['name']}:" + traceback.format_exc(), self.__chat_bot)
@@ -58,10 +59,12 @@ class CommandActionsHelper:
             finally:
                 try:
                     if error:
+                        log.warning(f"Trying again after recovery from error.", self.__chat_bot)
                         self.__restart_game()
                         self.__execute_method(method, positional_arguments, keyword_arguments)
                         error = False 
-                except:
+                except BaseException as ex:
+                    log.warning(f"Tried again, but without success.\nError in {self.__config['WEBDRIVER']['name']}:" + traceback.format_exc(), self.__chat_bot)
                     self.check_possible_server_error()
 
 

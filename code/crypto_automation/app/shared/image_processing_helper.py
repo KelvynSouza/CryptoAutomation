@@ -108,20 +108,22 @@ class ImageHelper:
         return result
 
 
-    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, confidence_level = 0.1, should_throw_exception = False, should_grayscale = True): 
+    def wait_all_until_match_is_found(self, method_image_to_validate, method_image_to_validate_args, template_path, timeout, quantity = 0, confidence_level = 0.1, should_throw_exception = False, should_grayscale = True): 
         duration = 0
-        result = None        
+        result = []        
         template = cv2.imread(template_path)    
 
+        expected_quantity_comparison = False
         start_time = time.time()
-        while result == None and duration < timeout:                     
+        while (result == [] or expected_quantity_comparison == False) and duration < timeout:                     
             website_picture = method_image_to_validate(*method_image_to_validate_args) 
             result = self.find_exact_matches_position(website_picture, template, should_grayscale, confidence_level)  
             current_time = time.time() 
             duration = current_time - start_time
+            expected_quantity_comparison = True if quantity == 0 else len(result) == quantity 
             time.sleep(0.1)
 
-        if result == None and should_throw_exception == True:
+        if (result == [] or expected_quantity_comparison == False) and should_throw_exception == True:
             raise Exception(f"Element {template_path} not found on screen!")
 
         return result

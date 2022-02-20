@@ -132,7 +132,7 @@ class LunaGameStatusCommand:
 
             self.__uncheck_all_heroes() 
 
-            empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 0.1)
+            empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 6, 0.1)
             if len(empty_heroes) == self.__config['LUNA_CONFIG'].getint('number_of_heroes'):
                 log.error(f"There are no heroes with energy to spend!", self.__chat_bot)
                 self.__close_browser()
@@ -147,7 +147,7 @@ class LunaGameStatusCommand:
             while True: 
                 tries += 1
 
-                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 5, 0.1)
+                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 10, 6, 0.1)
                 if len(empty_heroes) == len(team_members): 
                     log.warning(f"All energy spend from team {','.join(team_members)}", self.__chat_bot)                   
                     log.image(self.__windows_action_helper, self.__chat_bot) 
@@ -189,22 +189,24 @@ class LunaGameStatusCommand:
 
         
     def __uncheck_all_heroes(self):
+        log.warning(f"Unchecking heroes on screen", self.__chat_bot)
         for i in range(1, self.__config['LUNA_CONFIG'].getint('number_of_heroes')+1):
             checked_hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\checked_hero_{i}.png"
             hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\hero_{i}.png"
 
-            if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 5, 0.02):
+            if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 5):
                 self.__commands_helper.find_and_click_by_template(checked_hero_image_path)
-                self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], hero_image_path, 15, 0.02, True)
+                self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], hero_image_path, 15, 0.1, True)
 
 
     def __check_team_heroes(self, team_members: list[str]):
+        log.warning(f"Checking team: {','.join(team_members)}", self.__chat_bot)
         for i in team_members:
             checked_hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\checked_hero_{i}.png"
             hero_image_path = f"{self.__config['TEMPLATES']['luna_heroes_path']}\\hero_{i}.png"
             
             self.__commands_helper.find_and_click_by_template(hero_image_path)
-            self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 15, 0.05, True)
+            self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], checked_hero_image_path, 15, 0.1, True)
 
 
 # region Util

@@ -114,11 +114,8 @@ class LunaGameStatusCommand:
         self.__open_chrome_and_goto_game()
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_button'])
-
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_boss_1'], 10):
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_1'], should_grayscale=False)
-        else:
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_2'], should_grayscale=False)
+      
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_boss_available'], should_grayscale=False)
 
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                      [], self.__config['TEMPLATES']['luna_hunt_boss_button'],
@@ -128,24 +125,25 @@ class LunaGameStatusCommand:
 
         teams = self.__config['LUNA_CONFIG']['team_members'].split('|')        
         for team in teams:
-            team_members = team.split(",")           
+            team_members = team.split(",")
 
-            self.__uncheck_all_heroes() 
-
-            empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 6, 0.1)
-            if len(empty_heroes) == self.__config['LUNA_CONFIG'].getint('number_of_heroes'):
-                log.error(f"There are no heroes with energy to spend!", self.__chat_bot)
-                self.__close_browser()
-                return
-
-            self.__check_team_heroes(team_members)
-
-            log.warning(f"Hunting boss with team {','.join(team_members)}", self.__chat_bot)
-            log.image(self.__windows_action_helper, self.__chat_bot)  
-                        
             tries = 0
             while True: 
+                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['luna_open_heroes_tab_button'], should_grayscale=False)
+
                 tries += 1
+                self.__uncheck_all_heroes() 
+
+                empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar'], 5, 6, 0.1)
+                if len(empty_heroes) == self.__config['LUNA_CONFIG'].getint('number_of_heroes'):
+                    log.error(f"There are no heroes with energy to spend!", self.__chat_bot)
+                    self.__close_browser()
+                    return
+
+                self.__check_team_heroes(team_members)
+
+                log.warning(f"Hunting boss with team {','.join(team_members)}", self.__chat_bot)
+                log.image(self.__windows_action_helper, self.__chat_bot) 
 
                 empty_heroes = self.__image_helper.wait_all_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['luna_low_energy_bar_checked'], 10, 6, 0.1)
                 if len(empty_heroes) == len(team_members): 

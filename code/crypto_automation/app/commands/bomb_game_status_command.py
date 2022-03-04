@@ -73,7 +73,7 @@ class BombGameStatusCommand:
                                                       [], self.__config['TEMPLATES']['connect_wallet_button'],
                                                       self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
-        self.__captcha_solver.get_game_window()
+        #self.__captcha_solver.get_game_window()
 
 
     def __security_check(self):
@@ -86,10 +86,14 @@ class BombGameStatusCommand:
     def __enter_game(self):
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['first_metamask_connect_button'])
+
         if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 5, 0.05):
             self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending']) 
             
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
+
+
 
         self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)

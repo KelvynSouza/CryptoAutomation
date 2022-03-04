@@ -55,6 +55,8 @@ class BombGameStatusCommand:
 
         self.__security_check()
 
+        self.__login_metamask()
+
         self.__enter_game()
 
 
@@ -65,11 +67,15 @@ class BombGameStatusCommand:
 
         self.__windows_action_helper.press_special_buttons("enter")
 
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['accept_terms'])
+
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['acceptterms_button'])
+
         self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot,
                                                       [], self.__config['TEMPLATES']['connect_wallet_button'],
                                                       self.__config['TIMEOUT'].getint('imagematching'), 0.05, True)
 
-        self.__captcha_solver.get_game_window()
+        #self.__captcha_solver.get_game_window()
 
 
     def __security_check(self):
@@ -78,40 +84,24 @@ class BombGameStatusCommand:
                                                                     self.__config['TIMEOUT'].getint('imagematching') , 
                                                                     0.02, True)
 
+    def __login_metamask(self):
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_icon'], 0.02)
 
-    def __enter_game(self):
-        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
-
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 5, 0.05):
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending']) 
-            
-        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_welcome_text'], 0.02)
-
-        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input_inactive'],
+        self.__commands_helper.find_and_write_by_template(self.__config['TEMPLATES']['metamask_password_input'],
                                           keyring.get_password(self.__config['SECURITY']['serviceid'], self.__password_access), 0.02)
 
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_unlock_button'], 0.02)
 
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['bnb_symbol'], 10, 0.05):
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['half_connect_wallet_button'])
-            
-        if self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_sign_button'], 10, 0.05):
-            self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button']) 
-           
-        elif self.__image_helper.wait_until_match_is_found(self.__windows_action_helper.take_screenshot, [], self.__config['TEMPLATES']['metamask_pending'], 10, 0.05):
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_pending'])
-            
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        self.__windows_action_helper.press_special_buttons("esc")
 
-                self.__windows_action_helper.press_special_buttons("esc")
-        else:
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['restart_button'])
+    def __enter_game(self):
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
 
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['connect_wallet_button'])
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['first_metamask_connect_button'])
 
-                time.sleep(5)
+        time.sleep(3)
 
-                self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
+        self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['metamask_sign_button'])
                     
         self.__commands_helper.find_and_click_by_template(self.__config['TEMPLATES']['MapMode'])
 
